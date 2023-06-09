@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace NucleusOneDotNetSdk.Common
+namespace Ademero.NucleusOneDotNetSdk.Common
 {
     internal static class Util
     {

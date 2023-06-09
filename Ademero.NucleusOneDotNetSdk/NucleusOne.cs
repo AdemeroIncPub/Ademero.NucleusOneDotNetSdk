@@ -1,10 +1,10 @@
-﻿using NucleusOneDotNetSdk.Model;
+﻿using Ademero.NucleusOneDotNetSdk.Model;
 using System;
 using System.Threading.Tasks;
 
 [assembly: CLSCompliant(true)]
 
-namespace NucleusOneDotNetSdk
+namespace Ademero.NucleusOneDotNetSdk
 {
     public static class NucleusOne
     {

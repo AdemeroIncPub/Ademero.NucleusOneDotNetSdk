@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace NucleusOneDotNetSdk.Common.Model
+namespace Ademero.NucleusOneDotNetSdk.Common.Model
 {
     public interface IToApiModel<T>
     {

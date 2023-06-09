@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NucleusOneDotNetSdk.ApiModel
+namespace Ademero.NucleusOneDotNetSdk.ApiModel
 {
     public class QueryResult<T>
         where T : class

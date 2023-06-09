@@ -1,4 +1,4 @@
-﻿namespace NucleusOneDotNetSdk.Common.Strings
+﻿namespace Ademero.NucleusOneDotNetSdk.Common.Strings
 {
     public static class StringExtensions
     {

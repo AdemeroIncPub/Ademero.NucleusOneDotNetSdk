@@ -1,9 +1,9 @@
-﻿using NucleusOneDotNetSdk.Common.Strings;
+﻿using Ademero.NucleusOneDotNetSdk.Common.Strings;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace NucleusOneDotNetSdk.Hierarchy
+namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 {
     /// <summary>
     /// Performs organization operations.

@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace NucleusOneDotNetSdk
+namespace Ademero.NucleusOneDotNetSdk
 {
     /// <summary>
     /// Provides the ability to provide variables in an execution scope.  Imitates the functionality

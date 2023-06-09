@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NucleusOneDotNetSdk.Model
+namespace Ademero.NucleusOneDotNetSdk.Model
 {
     public class QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel> : NucleusOneAppDependent
         where TApiModelCollection : class, new()

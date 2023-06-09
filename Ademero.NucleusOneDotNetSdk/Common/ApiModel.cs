@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NucleusOneDotNetSdk.Common.ApiModel
+namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
 {
     /// <summary>
     /// Base class for API Model classes which support paging.

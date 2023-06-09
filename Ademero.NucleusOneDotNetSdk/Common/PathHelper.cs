@@ -1,4 +1,4 @@
-﻿namespace NucleusOneDotNetSdk.Common
+﻿namespace Ademero.NucleusOneDotNetSdk.Common
 {
     /// <summary>
     /// This class is directly translated from the Nucleus One client's project.
