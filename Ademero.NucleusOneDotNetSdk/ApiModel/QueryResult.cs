@@ -4,12 +4,16 @@ using System.Collections.Generic;
 
 namespace Ademero.NucleusOneDotNetSdk.ApiModel
 {
+    [Serializable]
     public class QueryResult<T>
         where T : class
     {
         public static readonly Dictionary<Type, Func<string, object>> fromJsonFactories = new Dictionary<Type, Func<string, object>>
         {
-            { typeof(ApiModel.OrganizationForClientCollection), (x) => ApiModel.OrganizationForClientCollection.FromJson(x) }
+            { typeof(ApiModel.DocumentUploadCollection), (x) => ApiModel.DocumentUploadCollection.FromJson(x) },
+            { typeof(ApiModel.OrganizationForClientCollection), (x) => ApiModel.OrganizationForClientCollection.FromJson(x) },
+            { typeof(ApiModel.OrganizationMemberCollection), (x) => ApiModel.OrganizationMemberCollection.FromJson(x) },
+            { typeof(ApiModel.OrganizationProjectCollection), (x) => ApiModel.OrganizationProjectCollection.FromJson(x) }
         };
 
         public QueryResult() { }
@@ -53,6 +57,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
 
     /// <summary>
     /// </summary>
+    [Serializable]
     public abstract class QueryResultEntityCollection<TCollection, TEntity> : Common.ApiModel.EntityCollection<TEntity>
         where TEntity : Common.ApiModel.Entity<TEntity>, new()
     {

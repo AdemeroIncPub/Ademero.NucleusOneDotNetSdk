@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Ademero.NucleusOneDotNetSdk.Common.Model
@@ -11,6 +12,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.Model
     /// <summary>
     /// The base class for all entities.
     /// </summary>
+    [Serializable]
     public abstract class Entity<TApiModel> : NucleusOneAppDependent, IToApiModel<TApiModel>
     {
         public Entity(NucleusOneApp app) : base(app) { }
@@ -21,6 +23,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.Model
     /// <summary>
     /// Base class for Model classes which support paging.
     /// </summary>
+    [Serializable]
     public abstract class IModelPagingCursor
     {
         /// <summary>
@@ -37,6 +40,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.Model
     /// <summary>
     /// Base class for Model classes which support paging and a reverse cursor.
     /// </summary>
+    [Serializable]
     public abstract class IModelPagingCursor2 : IModelPagingCursor
     {
         /// <summary>
@@ -48,6 +52,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.Model
 
     /// <summary>
     /// </summary>
+    [Serializable]
     public abstract class EntityCollection<TResult, TApiModel>
         : NucleusOneAppDependent, IEnumerable, IEnumerable<TResult>
         where TResult : NucleusOneAppDependent

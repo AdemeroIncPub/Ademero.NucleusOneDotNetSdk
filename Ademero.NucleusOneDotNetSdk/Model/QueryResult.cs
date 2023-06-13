@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
 {
+    [Serializable]
     public class QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel> : NucleusOneAppDependent
         where TApiModelCollection : class, new()
         where TApiModel : class, new()
@@ -12,7 +13,6 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         private static readonly Dictionary<Type, Func<dynamic, object>> _fromApiModelFactories =
             new Dictionary<Type, Func<dynamic, object>>()
             {
-                //{ Model.OrganizationForClientCollection: (x) => Model.OrganizationForClientCollection.fromApiModel(x) }
                 /*
                 ...QueryResult2._fromApiModelFactories, // Include factories from the QueryResult2 class
                 mod.DocumentCollection: (x) => mod.DocumentCollection.fromApiModel(x),
@@ -26,6 +26,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 mod.TaskCollection: (x) => mod.TaskCollection.fromApiModel(x),
                 */
                 { typeof(Model.OrganizationForClientCollection), (x) => Model.OrganizationForClientCollection.FromApiModel(x) },
+                { typeof(Model.OrganizationMemberCollection), (x) => Model.OrganizationMemberCollection.FromApiModel(x) },
+                { typeof(Model.OrganizationProjectCollection), (x) => Model.OrganizationProjectCollection.FromApiModel(x) },
                 /*
                 mod.OrganizationMembershipPackageCollection: (x) =>
                     mod.OrganizationMembershipPackageCollection.fromApiModel(x),

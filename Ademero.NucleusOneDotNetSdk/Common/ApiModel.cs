@@ -9,6 +9,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
     /// <summary>
     /// Base class for API Model classes which support paging.
     /// </summary>
+    [Serializable]
     public abstract class IApiModelPagingCursor
     {
         public abstract string Cursor { get; set; }
@@ -18,6 +19,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
     /// <summary>
     /// Base class for API Model classes which support paging and a reverse cursor.
     /// </summary>
+    [Serializable]
     public abstract class IApiModelPagingCursor2 : IApiModelPagingCursor
     {
         public abstract string ReverseCursor { get; set; }
@@ -26,6 +28,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
     /// <summary>
     /// The base class for all entities.
     /// </summary>
+    [Serializable]
     public abstract class Entity<T>
         where T : class, new()
     {
@@ -52,6 +55,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
     /// currently implicitly supported by json_serializable.
     /// https://github.com/google/json_serializable.dart/issues/648
     /// </summary>
+    [Serializable]
     public abstract class EntityCollection<TEntity>: IEnumerable, IEnumerable<TEntity>
         where TEntity : Entity<TEntity>, new()
     {

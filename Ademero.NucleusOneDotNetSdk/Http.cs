@@ -16,7 +16,7 @@ namespace Ademero.NucleusOneDotNetSdk
         /// <summary>
         /// Gets a standard <see cref="HttpClient"/> instance.
         /// </summary>
-        private static HttpClient GetStandardHttpClient()
+        public static HttpClient GetStandardHttpClient()
         {
             // https://stackoverflow.com/a/27327208
 #pragma warning disable CA2000 // Dispose objects before losing scope
@@ -264,6 +264,23 @@ namespace Ademero.NucleusOneDotNetSdk
             return await clientResponse.Content.ReadAsStringAsync()
                 .ConfigureAwait(true);
         }
+
+        /// <summary>
+        /// Execute an HTTP PUT request, returning the response body.
+        /// </summary>
+        /// <inheritdoc cref="ExecuteStandardHttpRequest" select="param" />
+        public static async Task<string> ExecutePutRequestWithTextResponse(
+            string apiRelativeUrlPath,
+            Dictionary<string, dynamic> queryParams = null,
+            string body = null,
+            bool authenticated = true,
+            NucleusOneApp app = null
+        )
+        {
+            var clientResponse = await ExecuteStandardHttpRequest(apiRelativeUrlPath, HttpMethod.Put, queryParams, body, authenticated, app);
+            return await clientResponse.Content.ReadAsStringAsync()
+                .ConfigureAwait(true);
+        }
     }
 
     /// <summary>
@@ -318,8 +335,8 @@ namespace Ademero.NucleusOneDotNetSdk
         //    "/organizations/<organizationId>/projects/<projectId>/documentPackages/<documentId>";
         //public const string organizationsProjectsDocumentSubscriptionsFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/documentSubscriptions/<documentId>";
-        //public const string organizationsProjectsDocumentUploadsFormat =
-        //    "/organizations/<organizationId>/projects/<projectId>/documentUploads";
+        public const string OrganizationsProjectsDocumentUploadsFormat =
+            "/organizations/<organizationId>/projects/<projectId>/documentUploads";
         //public const string organizationsProjectsDocumentsFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/documents";
         //public const string organizationsProjectsDocumentsDocumentFormat =
@@ -348,7 +365,7 @@ namespace Ademero.NucleusOneDotNetSdk
         //    "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>";
         //public const string organizationsProjectsFieldsFieldListItemsFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>/listItems";
-        //public const string organizationsProjectsFormat = "/organizations/<organizationId>/projects";
+        public const string OrganizationsProjectsFormat = "/organizations/<organizationId>/projects";
         //public const string organizationsProjectsProjectFormat =
         //    "/organizations/<organizationId>/projects/<projectId>";
         //public const string organizationsProjectsFormTemplatesFormat =
@@ -402,15 +419,15 @@ namespace Ademero.NucleusOneDotNetSdk
         /// <summary>
         /// Builds a map containing query string parameters.
         /// </summary>
-        /// <param name="Callbacks">A list of standard query parameters to include in the map.</param>
+        /// <param name="callbacks">A list of standard query parameters to include in the map.</param>
         public static Dictionary<string, dynamic> Get(
-            Action<StandardQueryParams>[] Callbacks
+            Action<StandardQueryParams>[] callbacks = null
         )
         {
             var sqp = new StandardQueryParams();
-            if (Callbacks != null)
+            if (callbacks != null)
             {
-                foreach (var cb in Callbacks)
+                foreach (var cb in callbacks)
                 {
                     cb(sqp);
                 }

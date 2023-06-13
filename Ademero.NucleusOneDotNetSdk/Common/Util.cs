@@ -3,7 +3,7 @@ using System;
 
 namespace Ademero.NucleusOneDotNetSdk.Common
 {
-    internal static class Util
+    public static class Util
     {
         /// <summary>
         /// Defines a <see cref="NucleusOneApp"/> instance in a local scope, such that it may be retrieved using the

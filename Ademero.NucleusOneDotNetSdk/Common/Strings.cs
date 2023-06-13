@@ -1,4 +1,6 @@
-﻿namespace Ademero.NucleusOneDotNetSdk.Common.Strings
+﻿using Ademero.NucleusOneDotNetSdk.Hierarchy;
+
+namespace Ademero.NucleusOneDotNetSdk.Common.Strings
 {
     public static class StringExtensions
     {
@@ -10,14 +12,14 @@
             return str.ToLowerInvariant() == "true";
         }
 
-        ///// <summary>
-        ///// Replaces the placeholder value with an actual value.
-        ///// </summary>
-        ///// <param name="project">The project that the replacement values should be sourced from.</param>
-        //public static string ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this string str, NucleusOneAppProject project)
-        //{
-        //    return str.ReplaceOrgIdPlaceholder(project.organization.id).ReplaceProjectIdPlaceholder(project.id);
-        //}
+        /// <summary>
+        /// Replaces the placeholder value with an actual value.
+        /// </summary>
+        /// <param name="project">The project that the replacement values should be sourced from.</param>
+        public static string ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this string str, NucleusOneAppProject project)
+        {
+            return str.ReplaceOrgIdPlaceholder(project.Organization.Id).ReplaceProjectIdPlaceholder(project.Id);
+        }
 
         /// <summary>
         /// Replaces the placeholder value with an actual value.

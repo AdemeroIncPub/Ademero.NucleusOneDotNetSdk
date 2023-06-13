@@ -1,5 +1,7 @@
 ﻿using Ademero.NucleusOneDotNetSdk.Model;
 using System;
+using System.Diagnostics;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 [assembly: CLSCompliant(true)]
@@ -85,11 +87,24 @@ namespace Ademero.NucleusOneDotNetSdk
 
     /// Classes deriving from this class require an instance of the <see cref="NucleusOneApp"/>
     /// class in order to function.
+    [Serializable]
     public abstract class NucleusOneAppDependent
     {
+        [NonSerialized]
         NucleusOneApp _app;
 
         protected NucleusOneAppDependent(NucleusOneApp app)
+        {
+            InitializeApp(app);
+        }
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            InitializeApp();
+        }
+
+        private void InitializeApp(NucleusOneApp app = null)
         {
             _app = app ?? GetIt.Get<NucleusOneApp>();
         }
@@ -149,7 +164,7 @@ namespace Ademero.NucleusOneDotNetSdk
             GetOrganizations(string cursor = null)
         {
             var qp = StandardQueryParams.Get(
-                Callbacks: new Action<StandardQueryParams>[]{
+                callbacks: new Action<StandardQueryParams>[]{
                     (sqp) => sqp.Cursor(cursor)
                 }
             );

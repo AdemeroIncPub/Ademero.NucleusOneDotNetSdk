@@ -1,7 +1,11 @@
-﻿using Ademero.NucleusOneDotNetSdk.Common.Strings;
+﻿using Ademero.NucleusOneDotNetSdk.Common;
+using Ademero.NucleusOneDotNetSdk.Common.Strings;
+using Ademero.NucleusOneDotNetSdk.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 {
@@ -21,7 +25,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <param name="id">The organization's ID.</param>
         /// <param name="app">The application to use when connecting to Nucleus One.</param>
         /// <exception cref="ArgumentException"></exception>
-        public NucleusOneAppOrganization(string id, NucleusOneApp app = null) :base(app)
+        public NucleusOneAppOrganization(string id, NucleusOneApp app = null) : base(app)
         {
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentException("Value cannot be blank.", nameof(id));
@@ -108,46 +112,60 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             var apiModel = JsonConvert.DeserializeObject<ApiMod.OrganizationProject>(responseBody);
             return await Util.DefineN1AppInScope(App, () => OrganizationProject.FromApiModel(apiModel));
         }
+        */
 
         /// <summary>
         /// Gets projects that the current user is a member of, by page.
-        /// cursor: The ID of the cursor, from a previous query. Used for paging results.
-        /// projectAccessType: Can be any of the following values:
+        /// </summary>
+        /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
+        /// <param name="projectAccessType">
+        /// Can be any of the following values:
         /// - GlobalAssignments_MemberContentByDefault
         /// - MembersOnlyAssignments_MemberContentByAssignment
-        /// nameFilter: Filters results to only those projects starting with this value.
-        /// getAll: Returns all projects in a single results, without using paging.
-        /// adminOnly: If true, only projects that the current user is an administrator of will be returned.
-        /// </summary>
-        public async Task<QueryResult<OrganizationProjectCollection, ApiMod.OrganizationProjectCollection>>
-            GetProjects(string? cursor = null, string? projectAccessType = null, string? nameFilter = null, bool getAll = false, bool adminOnly = false)
+        /// </param>
+        /// <param name="nameFilter">Filters results to only those projects starting with this value.</param>
+        /// <param name="getAll">Returns all projects in a single results, without using paging.</param>
+        /// <param name="adminOnly">If true, only projects that the current user is an administrator of will be returned.</param>
+        public async Task<QueryResult<OrganizationProjectCollection, OrganizationProject, ApiModel.OrganizationProjectCollection, ApiModel.OrganizationProject>> GetProjects(
+            string cursor = null, string projectAccessType = null, string nameFilter = null, bool? getAll = null, bool? adminOnly = null)
         {
-            var qp = new Dictionary<string, string>
-            {
-                {"cursor", cursor},
-                {"projectAccessType", projectAccessType},
-                {"nameFilter", nameFilter},
-                {"getAll", getAll.ToString()},
-                {"adminOnly", adminOnly.ToString()}
-            };
+            var qp = StandardQueryParams.Get(
+                callbacks: new Action<StandardQueryParams>[] {
+                    (sqp) => sqp.Cursor(cursor)
+                }
+            );
 
+            if (projectAccessType != null)
+            {
+                qp["projectAccessType"] = projectAccessType;
+            }
+            if (nameFilter != null)
+            {
+                qp["nameFilter"] = nameFilter;
+            }
+            if (getAll != null)
+            {
+                qp["getAll"] = getAll;
+            }
+            if (adminOnly != null)
+            {
+                qp["adminOnly"] = adminOnly;
+            }
             var responseBody = await Http.ExecuteGetRequestWithTextResponse(
-                ApiPaths.OrganizationsProjectsFormat.ReplaceOrgIdPlaceholder(Id),
-                App,
-                qp);
+                apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFormat.ReplaceOrgIdPlaceholder(Id),
+                app: App,
+                queryParams: qp
+            );
 
-            var apiModel = JsonConvert.DeserializeObject<ApiMod.QueryResult<ApiMod.OrganizationProjectCollection>>(responseBody);
+            var apiModel = ApiModel.QueryResult<ApiModel.OrganizationProjectCollection>.FromJson(responseBody);
 
-            return await Util.DefineN1AppInScope(App, () =>
-            {
-                return new QueryResult<OrganizationProjectCollection, ApiMod.OrganizationProjectCollection>(
-                    new OrganizationProjectCollection(
-                        apiModel.Results.Projects.Select(x => OrganizationProject.FromApiModel(x)).ToList()),
-                    apiModel.Cursor,
-                    apiModel.PageSize);
+            return Common.Util.DefineN1AppInScope(App, () => {
+                return QueryResult<OrganizationProjectCollection, OrganizationProject, ApiModel.OrganizationProjectCollection, ApiModel.OrganizationProject>
+                    .FromApiModel(apiModel);
             });
         }
 
+        /*
         /// <summary>
         /// Gets membership packages for this organization, which the current user has access to.
         /// </summary>
