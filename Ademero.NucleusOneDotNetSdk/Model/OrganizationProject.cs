@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
 {
@@ -11,7 +9,10 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     {
         private OrganizationProject(NucleusOneApp app) : base(app) { }
 
-        public static OrganizationProject FromApiModel(ApiModel.OrganizationProject apiModel, NucleusOneApp app)
+        public static OrganizationProject FromApiModel(
+            ApiModel.OrganizationProject apiModel,
+            NucleusOneApp app = null
+        )
         {
             return new OrganizationProject(app)
             {

@@ -23,7 +23,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 OriginalFilepath = apiModel.OriginalFilepath,
                 OriginalFileSize = apiModel.OriginalFileSize,
                 FieldIDsAndValues = apiModel.FieldIDsAndValues,
-                DocumentFolderID = apiModel.DocumentFolderID
+                DocumentFolderID = apiModel.DocumentFolderID,
+                ContentType = apiModel.ContentType
             };
         }
 
@@ -48,6 +49,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         public Dictionary<string, List<string>> FieldIDsAndValues { get; set; }
 
         public string DocumentFolderID { get; set; }
+
+        public string ContentType { get; set; }
 
         #endregion
 

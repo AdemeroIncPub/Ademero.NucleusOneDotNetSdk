@@ -74,7 +74,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.Model
         private readonly TResult[] _items;
 
         /// <summary>
-        /// Gets all items in this collections.
+        /// Gets all items in this collection.
         /// </summary>
         public TResult[] Items { get => _items; }
 

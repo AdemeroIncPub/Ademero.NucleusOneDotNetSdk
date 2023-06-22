@@ -33,14 +33,15 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             Id = id;
         }
 
-        /*
         /// <summary>
         /// Gets a NucleusOneAppProject instance, which can be used to perform project operations for this organization.
         /// </summary>
         public NucleusOneAppProject Project(string projectId)
         {
-            return new NucleusOneAppProject(projectId, this);
+            return new NucleusOneAppProject(this, projectId);
         }
+
+        /*
 
         /// <summary>
         /// Gets a NucleusOneAppSubscriptions instance, which can be used to perform subscription operations for this organization.
@@ -175,6 +176,48 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             return await App.GetOrganizationMembershipPackages(Id);
         }
         */
+
+        public async Task<Model.OrganizationProject> CreateProject(string projectName, ProjectAccessType accessType,
+            string templateId = null, bool sourceContentCopy = false)
+        {
+            string body = Common.Util.SerializeObject(
+                new[] {
+                    new {
+                        Name = projectName,
+                        AccessType = (accessType== ProjectAccessType.Restrictive)
+                            ? "MembersOnlyAssignments_MemberContentByAssignment"
+                            : "GlobalAssignments_MemberContentByDefault",
+                        SourceID = templateId,
+                        SourceContentCopy = sourceContentCopy
+                    }
+                });
+
+            string responseBody = await Http.ExecutePostRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFormat.ReplaceOrgIdPlaceholder(Id),
+                    queryParams: new Dictionary<string, dynamic>()
+                    {
+                        { "homePath", Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath()) },
+                        { "projectPathPrefix", Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath()) }
+                    },
+                    app: App,
+                    body: body
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.OrganizationProjectCollection.FromJsonArray(
+                arrayItemsJson: responseBody,
+                instance: new ApiModel.OrganizationProjectCollection(),
+                entityFromJsonCallback: (x) => ApiModel.OrganizationProject.FromJson(x)
+            );
+
+            return Common.Util.DefineN1AppInScope(App, () =>
+            {
+                var createdProjects = Model.OrganizationProjectCollection.FromApiModel(apiModel);
+                if ((createdProjects == null) || (createdProjects.Items.Length == 0))
+                    return null;
+                return createdProjects.Items[0];
+            });
+        }
 
         public async Task<Model.OrganizationMemberCollection> AddMembers(Model.OrganizationMemberCollection users)
         {

@@ -92,7 +92,7 @@ namespace Ademero.NucleusOneDotNetSdk
                 {
                     if ((qpValue is bool) || (qpValue is int) || (qpValue is double))
                     {
-                        qpValue = qpValue.toString();
+                        qpValue = qpValue.ToString();
                     }
                     else
                     {
@@ -359,8 +359,8 @@ namespace Ademero.NucleusOneDotNetSdk
         //    "/organizations/<organizationId>/projects/<projectId>/documents/<documentId>/thumbnails";
         //public const string organizationsProjectsDocumentsRecentDocumentSignatureFormsFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/recentDocumentSignatureForms";
-        //public const string organizationsProjectsFieldsFormat =
-        //    "/organizations/<organizationId>/projects/<projectId>/fields";
+        public const string OrganizationsProjectsFieldsFormat =
+            "/organizations/<organizationId>/projects/<projectId>/fields";
         //public const string organizationsProjectsFieldsFieldFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>";
         //public const string organizationsProjectsFieldsFieldListItemsFormat =

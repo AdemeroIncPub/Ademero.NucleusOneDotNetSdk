@@ -4,6 +4,7 @@ using Ademero.NucleusOneDotNetSdk.Model;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Ademero.NucleusOneDotNetSdk.Hierarchy
@@ -41,6 +42,9 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 
         /// <summary>
         /// Gets a Document Upload reservation for this project.
+        ///
+        /// Call this *only* if you want to handle the upload process of a document manually; otherwise,
+        /// you likely want to call <see cref="UploadDocument"/>, instead, which handles the entire process.
         /// </summary>
         public async Task<DocumentUpload> GetDocumentUploadReservation()
         {
@@ -68,11 +72,16 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             {
                 Content = new StringContent("{}"),
             };
-            initialReq.Headers.Add("Content-Type", "application/octet-stream");
+            if (initialReq.Content != null)
+            {
+                //initialReq.Headers.Add("Content-Type", "application/octet-stream");
+                initialReq.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            }
+
             initialReq.Headers.Add("x-goog-resumable", "start");
 
             var initialResp = await httpClient.SendAsync(initialReq);
-            if (initialResp.StatusCode != System.Net.HttpStatusCode.OK)
+            if (!initialResp.IsSuccessStatusCode)
             {
                 throw new Exception($"Error initializing upload to cloud storage. HTTP {(int)initialResp.StatusCode}: {await initialResp.Content.ReadAsStringAsync()}");
             }
@@ -103,8 +112,12 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                 {
                     Content = new ByteArrayContent(binaryChunk),
                 };
-                chunkReq.Headers.Add("Content-Type", contentType);
-                chunkReq.Headers.Add("Content-Range", $"bytes {offset}-{byteEnd}/{fileSize}");
+                if (chunkReq.Content != null)
+                {
+                    //chunkReq.Headers.Add("Content-Type", contentType);
+                    chunkReq.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+                    chunkReq.Content.Headers.ContentRange = new ContentRangeHeaderValue(offset, byteEnd, fileSize);
+                }
 
                 var chunkResp = await chunkReqHttpClient.SendAsync(chunkReq);
 
@@ -131,8 +144,11 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <param name="fileName">The file name to use when uploading the file.</param>
         /// <param name="contentType">The MIME type of the file.</param>
         /// <param name="file">The file to upload.</param>
+        /// <param name="documentFolderId">The ID of the folder to place the document in.</param>
+        /// <param name="fieldIDsAndValues">Document field IDs and values.</param>
         /// <returns>A task representing the asynchronous upload operation.</returns>
-        public async Task UploadDocument(string userEmail, string fileName, string contentType, byte[] file)
+        public async Task UploadDocument(string userEmail, string fileName, string contentType, byte[] file,
+            string documentFolderId = null, Dictionary<string, List<string>> fieldIDsAndValues = null)
         {
             var docUploadReservation = await GetDocumentUploadReservation();
             var fileSize = file.Length;
@@ -140,6 +156,9 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 
             docUploadReservation.OriginalFilename = fileName;
             docUploadReservation.OriginalFileSize = fileSize;
+            docUploadReservation.DocumentFolderID = documentFolderId;
+            docUploadReservation.ContentType = contentType;
+            docUploadReservation.FieldIDsAndValues = fieldIDsAndValues;
 
             var qp = StandardQueryParams.Get();
             qp["uniqueId"] = docUploadReservation.UniqueId;
@@ -152,5 +171,87 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                 body: Common.Util.SerializeObject(new List<ApiModel.DocumentUpload> { docUploadReservation.ToApiModel() })
             );
         }
+
+        /// <summary>
+        /// Gets a NucleusOneAppDocumentFolder instance, which can be used to perform project operations for this organization.
+        /// </summary>
+        public NucleusOneAppDocumentFolder DocumentFolder(string documentFolderId)
+        {
+            return new NucleusOneAppDocumentFolder(this, documentFolderId);
+        }
+
+        /// <summary>
+        /// Gets this project's field, by page.
+        /// </summary>
+        /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
+        public async Task<QueryResult<FieldCollection, Field, ApiModel.FieldCollection, ApiModel.Field>> GetFields(
+            string cursor = null)
+        {
+            var qp = StandardQueryParams.Get(
+                callbacks: new Action<StandardQueryParams>[] {
+                    (sqp) => sqp.Cursor(cursor)
+                }
+            );
+
+            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                app: App,
+                queryParams: qp
+            );
+
+            var apiModel = ApiModel.QueryResult<ApiModel.FieldCollection>.FromJson(responseBody);
+
+            return Common.Util.DefineN1AppInScope(App, () =>
+            {
+                return QueryResult<FieldCollection, Field, ApiModel.FieldCollection, ApiModel.Field>
+                    .FromApiModel(apiModel);
+            });
+        }
+
+        /// <summary>
+        /// Creates fields in this project.
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public async Task<Model.FieldCollection> CreateFields(Model.FieldCollection fields)
+        {
+            string body = Common.Util.SerializeObject(fields);
+            
+            string responseBody = await Http.ExecutePostRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFormat.ReplaceOrgIdPlaceholder(Id),
+                    app: App,
+                    body: body
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.FieldCollection.FromJsonArray(
+                arrayItemsJson: responseBody,
+                instance: new ApiModel.FieldCollection(),
+                entityFromJsonCallback: (x) => ApiModel.Field.FromJson(x)
+            );
+
+            return Common.Util.DefineN1AppInScope(App, () =>
+            {
+                var createdFields = Model.FieldCollection.FromApiModel(apiModel);
+                if ((createdFields == null) || (createdFields.Items.Length == 0))
+                    return null;
+                return createdFields;
+            });
+        }
+    }
+
+    public enum ProjectAccessType
+    {
+        Restrictive,
+        Permissive
+    }
+
+    public enum FieldType
+    {
+        FieldType_Text,
+        FieldType_Number,
+        FieldType_Currency,
+        FieldType_Date,
+        FieldType_Bool
     }
 }

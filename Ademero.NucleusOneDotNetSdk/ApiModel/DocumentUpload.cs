@@ -44,6 +44,9 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         [JsonProperty("DocumentFolderID")]
         public string DocumentFolderID { get; set; }
 
+        [JsonProperty("ContentType")]
+        public string ContentType { get; set; }
+
         #endregion
     }
 

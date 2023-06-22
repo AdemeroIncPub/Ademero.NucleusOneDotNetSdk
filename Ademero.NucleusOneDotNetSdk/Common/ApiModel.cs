@@ -78,14 +78,14 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
 
             instance.Items = arrayItemsJsons
                 .Select((m) => entityFromJsonCallback(m))
-                .ToList();
+                .ToArray();
             return instance;
         }
 
         /// <summary>
         /// The items in the array.
         /// </summary>
-        public List<TEntity> Items { get; set; } = new List<TEntity>();
+        protected TEntity[] Items { get; set; } = Array.Empty<TEntity>();
 
         /// <summary>
         /// Get this object as JSON.

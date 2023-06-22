@@ -14,6 +14,11 @@
             return $"/organizations/{organizationId}/link{path}";
         }
 
+        public static string GetProjectsPath()
+        {
+            return "/projects";
+        }
+
         public static string GetHomePath()
         {
             return "/home";
