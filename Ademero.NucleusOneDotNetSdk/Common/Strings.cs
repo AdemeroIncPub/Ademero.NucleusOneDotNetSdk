@@ -138,5 +138,14 @@ namespace Ademero.NucleusOneDotNetSdk.Common.Strings
         {
             return str.Replace("<taskId>", taskId);
         }
+
+        /// <summary>
+        /// Replaces the placeholder value with an actual value.
+        /// </summary>
+        /// <param name="fieldId">The field ID to replace the placeholder with.</param>
+        public static string ReplaceFieldIdPlaceholder(this string str, string fieldId)
+        {
+            return str.Replace("<fieldId>", fieldId);
+        }
     }
 }

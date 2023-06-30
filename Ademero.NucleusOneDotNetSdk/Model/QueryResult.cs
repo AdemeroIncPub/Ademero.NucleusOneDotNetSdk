@@ -16,10 +16,14 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 /*
                 ...QueryResult2._fromApiModelFactories, // Include factories from the QueryResult2 class
                 mod.DocumentCollection: (x) => mod.DocumentCollection.fromApiModel(x),
-                mod.DocumentFolderCollection: (x) => mod.DocumentFolderCollection.fromApiModel(x),
+                */
+                { typeof(Model.DocumentFolderCollection), (x) => Model.DocumentFolderCollection.FromApiModel(x) },
+                /*
                 mod.DocumentSubscriptionForClientCollection: (x) =>
                     mod.DocumentSubscriptionForClientCollection.fromApiModel(x),
-                mod.FieldCollection: (x) => mod.FieldCollection.fromApiModel(x),
+                */
+                { typeof(Model.FieldCollection), (x) => Model.FieldCollection.FromApiModel(x) },
+                /*
                 mod.ApprovalCollection: (x) => mod.ApprovalCollection.fromApiModel(x),
                 mod.FolderHierarchyCollection: (x) => mod.FolderHierarchyCollection.fromApiModel(x),
                 mod.FormTemplateCollection: (x) => mod.FormTemplateCollection.fromApiModel(x),

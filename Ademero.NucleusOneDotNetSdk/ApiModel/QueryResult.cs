@@ -10,7 +10,9 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
     {
         public static readonly Dictionary<Type, Func<string, object>> fromJsonFactories = new Dictionary<Type, Func<string, object>>
         {
+            { typeof(ApiModel.DocumentFolderCollection), (x) => ApiModel.DocumentFolderCollection.FromJson(x) },
             { typeof(ApiModel.DocumentUploadCollection), (x) => ApiModel.DocumentUploadCollection.FromJson(x) },
+            { typeof(ApiModel.FieldCollection), (x) => ApiModel.FieldCollection.FromJson(x) },
             { typeof(ApiModel.OrganizationForClientCollection), (x) => ApiModel.OrganizationForClientCollection.FromJson(x) },
             { typeof(ApiModel.OrganizationMemberCollection), (x) => ApiModel.OrganizationMemberCollection.FromJson(x) },
             { typeof(ApiModel.OrganizationProjectCollection), (x) => ApiModel.OrganizationProjectCollection.FromJson(x) }
@@ -40,7 +42,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
             Func<string, object> fromJsonFactoryOverride = null)
             where TQueryResult : QueryResult<T>
         {
-            var r = JsonConvert.DeserializeObject<TQueryResult>(json);
+            var r = Common.Util.DeserializeObject<TQueryResult>(json);
             var fromJsonFactory = fromJsonFactoryOverride ?? fromJsonFactories[typeof(T)];
             if (fromJsonFactory == null)
             {
@@ -62,7 +64,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         where TEntity : Common.ApiModel.Entity<TEntity>, new()
     {
 #pragma warning disable CA1000  // Do not declare static members on generic types
-        public static TCollection FromJson(string json) => JsonConvert.DeserializeObject<TCollection>(json);
+        public static TCollection FromJson(string json) => Common.Util.DeserializeObject<TCollection>(json);
 #pragma warning restore CA1000  // Do not declare static members on generic types
     }
 }

@@ -107,8 +107,12 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
     {
         #region Properties
 
-        [JsonProperty("Fields")]
-        public Field[] Fields { get; set; }
+        [JsonProperty(nameof(Fields))]
+        public Field[] Fields
+        {
+            get => Items;
+            set => Items = value;
+        }
 
         #endregion
     }

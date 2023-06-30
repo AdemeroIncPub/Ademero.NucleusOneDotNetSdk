@@ -45,13 +45,33 @@ namespace Ademero.NucleusOneDotNetSdk.Common
             }
         }
 
-        public static string SerializeObject(object value)
+        private static JsonSerializerSettings GetDefaultSettings()
         {
             var settings = new JsonSerializerSettings()
             {
                 // This should also be set on each ApiModel class
                 NullValueHandling = NullValueHandling.Ignore
             };
+            return settings;
+        }
+
+        public static object DeserializeObject(string value)
+        {
+            return JsonConvert.DeserializeObject(value, GetDefaultSettings());
+        }
+
+        public static T DeserializeObject<T>(string value)
+        {
+            return JsonConvert.DeserializeObject<T>(value, GetDefaultSettings());
+        }
+
+        public static string SerializeObject(object value)
+        {
+            return SerializeObject(value, GetDefaultSettings());
+        }
+
+        public static string SerializeObject(object value, JsonSerializerSettings settings)
+        {
             return JsonConvert.SerializeObject(value, settings);
         }
     }

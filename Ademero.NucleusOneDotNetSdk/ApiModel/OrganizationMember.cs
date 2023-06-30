@@ -60,7 +60,11 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         #region Properties
 
         [JsonProperty(nameof(OrganizationMembers))]
-        public OrganizationMember[] OrganizationMembers { get; set; }
+        public OrganizationMember[] OrganizationMembers
+        {
+            get => Items;
+            set => Items = value;
+        }
 
         #endregion
     }

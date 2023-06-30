@@ -23,5 +23,15 @@
         {
             return "/home";
         }
+
+        public static string GetWorkspacePath()
+        {
+            return "/workspace";
+        }
+
+        public static string GetWorkspaceDocumentFoldersPath(string projectId)
+        {
+            return $"{GetWorkspacePath()}/documents/projects/{projectId}/documentFolders";
+        }
     }
 }

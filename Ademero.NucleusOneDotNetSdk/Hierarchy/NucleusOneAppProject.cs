@@ -3,6 +3,7 @@ using Ademero.NucleusOneDotNetSdk.Common.Strings;
 using Ademero.NucleusOneDotNetSdk.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -138,6 +139,111 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         }
 
         /// <summary>
+        /// Creates a folder.
+        /// </summary>
+        /// <param name="name">The folder's name.</param>
+        /// <param name="parentId">The parent folder's ID.</param>
+        /// <returns>The created folder, if successful; otherwise, null.</returns>
+        public async Task<Model.DocumentFolder> CreateDocumentFolder(string name, string parentId = null)
+        {
+            var qp = StandardQueryParams.Get();
+            qp["documentFolderPathPrefix"] = PathHelper.GetOrganizationLink(Organization.Id,
+                PathHelper.GetWorkspaceDocumentFoldersPath(Id));
+
+            var docFolder = new {
+                ParentID = parentId,
+                Name = name,
+                AssignmentUserEmails = Array.Empty<string>(),
+                HexColor = (string)null
+            };
+
+            var responseBody = await Http.ExecutePostRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentFoldersFormat
+                        .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                    app: App,
+                    body: Util.SerializeObject(new[] { docFolder }, null),
+                    queryParams: qp
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.DocumentFolderCollection.FromJsonArray(
+                arrayItemsJson: responseBody,
+                instance: new ApiModel.DocumentFolderCollection(),
+                entityFromJsonCallback: (x) => ApiModel.DocumentFolder.FromJson(x)
+            );
+
+            return Util.DefineN1AppInScope(App, () =>
+            {
+                var createdFolders = Model.DocumentFolderCollection.FromApiModel(apiModel);
+                if ((createdFolders == null) || (createdFolders.Items.Length == 0))
+                    return null;
+                return createdFolders.Items[0];
+            });
+        }
+
+        /// <summary>
+        /// Gets document folders for the current project. Only one folder hierarchy level is returned.
+        /// </summary>
+        /// <param name="parentId">The ID of the parent folder in the hierarchy.</param>
+        /// <returns></returns>
+        public async Task<DocumentFolderCollection> GetDocumentFolders(string parentId = null)
+        {
+            var docFolders = new List<DocumentFolderCollection>();
+            string cursor = null;
+
+            do
+            {
+                var docFoldersPaged = await GetDocumentFoldersPaged(parentId, cursor);
+                var results = docFoldersPaged.Results;
+
+                if (results.Items.Length == 0)
+                    break;
+
+                docFolders.Add(results);
+                cursor = docFoldersPaged.Cursor;
+            } while (true);
+
+            var allFolders = docFolders.SelectMany(x => x.Items).ToArray();
+            return new DocumentFolderCollection(allFolders, App);
+        }
+
+        /// <summary>
+        /// Gets document folders for the current project. Only one folder hierarchy level is returned.
+        /// </summary>
+        /// <param name="parentId">The ID of the parent folder in the hierarchy.</param>
+        /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
+        /// <returns></returns>
+        public async Task<QueryResult<DocumentFolderCollection, DocumentFolder, ApiModel.DocumentFolderCollection, ApiModel.DocumentFolder>>
+            GetDocumentFoldersPaged(string parentId = null, string cursor = null)
+        {
+            var qp = StandardQueryParams.Get(
+                callbacks: new Action<StandardQueryParams>[] {
+                    (sqp) => sqp.Cursor(cursor)
+                }
+            );
+
+            if (!string.IsNullOrEmpty(parentId))
+            {
+                qp["parentId"] = parentId;
+            }
+
+            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentFoldersFormat
+                    .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                app: App,
+                queryParams: qp
+            );
+
+            var apiModel = ApiModel.QueryResult<ApiModel.DocumentFolderCollection>.FromJson(responseBody);
+
+            return Util.DefineN1AppInScope(App, () =>
+            {
+                return QueryResult<DocumentFolderCollection, DocumentFolder, ApiModel.DocumentFolderCollection, ApiModel.DocumentFolder>
+                    .FromApiModel(apiModel);
+            });
+        }
+
+        /// <summary>
         /// Uploads a new document into this project.
         /// </summary>
         /// <param name="userEmail">The email address of the user by whom the document will be uploaded.</param>
@@ -168,7 +274,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                 apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentUploadsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
                 app: App,
                 queryParams: qp,
-                body: Common.Util.SerializeObject(new List<ApiModel.DocumentUpload> { docUploadReservation.ToApiModel() })
+                body: Util.SerializeObject(new[] { docUploadReservation.ToApiModel() })
             );
         }
 
@@ -201,7 +307,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 
             var apiModel = ApiModel.QueryResult<ApiModel.FieldCollection>.FromJson(responseBody);
 
-            return Common.Util.DefineN1AppInScope(App, () =>
+            return Util.DefineN1AppInScope(App, () =>
             {
                 return QueryResult<FieldCollection, Field, ApiModel.FieldCollection, ApiModel.Field>
                     .FromApiModel(apiModel);
@@ -215,10 +321,10 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <returns></returns>
         public async Task<Model.FieldCollection> CreateFields(Model.FieldCollection fields)
         {
-            string body = Common.Util.SerializeObject(fields);
+            string body = Util.SerializeObject(fields);
             
             string responseBody = await Http.ExecutePostRequestWithTextResponse(
-                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFormat.ReplaceOrgIdPlaceholder(Id),
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
                     app: App,
                     body: body
                 )
@@ -230,7 +336,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                 entityFromJsonCallback: (x) => ApiModel.Field.FromJson(x)
             );
 
-            return Common.Util.DefineN1AppInScope(App, () =>
+            return Util.DefineN1AppInScope(App, () =>
             {
                 var createdFields = Model.FieldCollection.FromApiModel(apiModel);
                 if ((createdFields == null) || (createdFields.Items.Length == 0))

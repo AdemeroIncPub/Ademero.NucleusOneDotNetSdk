@@ -266,6 +266,27 @@ namespace Ademero.NucleusOneDotNetSdk
         }
 
         /// <summary>
+        /// Execute an HTTP POST request.
+        /// </summary>
+        /// <param name="apiRelativeUrlPath">The relative Nucleus One API path to use when call the API.</param>
+        /// <param name="queryParams">Query string parameters.</param>
+        /// <param name="body">The request body.</param>
+        /// <param name="authenticated">Indicates whether the request requires authentication.</param>
+        /// <param name="app">The application to use when connecting to Nucleus One.</param>
+        /// <returns>An instance of <see cref="HttpResponseMessage"/>.</returns>
+        public static async Task<HttpResponseMessage> ExecutePostRequest(
+            string apiRelativeUrlPath,
+            Dictionary<string, dynamic> queryParams = null,
+            string body = null,
+            bool authenticated = true,
+            NucleusOneApp app = null
+        )
+        {
+            return await ExecuteStandardHttpRequest(apiRelativeUrlPath, HttpMethod.Post, queryParams, body, authenticated, app)
+                .ConfigureAwait(true);
+        }
+
+        /// <summary>
         /// Execute an HTTP PUT request, returning the response body.
         /// </summary>
         /// <inheritdoc cref="ExecuteStandardHttpRequest" select="param" />
@@ -327,8 +348,8 @@ namespace Ademero.NucleusOneDotNetSdk
         //    "/organizations/<organizationId>/projects/<projectId>/documentActions/sendToRecycleBin";
         //public const string organizationsProjectsDocumentContentPackagesFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/documentContentPackages/<documentId>";
-        //public const string organizationsProjectsDocumentFoldersFormat =
-        //    "/organizations/<organizationId>/projects/<projectId>/documentFolders";
+        public const string OrganizationsProjectsDocumentFoldersFormat =
+            "/organizations/<organizationId>/projects/<projectId>/documentFolders";
         //public const string organizationsProjectsDocumentFoldersDocumentFolderFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/documentFolders/<documentFolderId>";
         //public const string organizationsProjectsDocumentPackagesFormat =
@@ -363,8 +384,8 @@ namespace Ademero.NucleusOneDotNetSdk
             "/organizations/<organizationId>/projects/<projectId>/fields";
         //public const string organizationsProjectsFieldsFieldFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>";
-        //public const string organizationsProjectsFieldsFieldListItemsFormat =
-        //    "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>/listItems";
+        public const string OrganizationsProjectsFieldsFieldListItemsFormat =
+            "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>/listItems";
         public const string OrganizationsProjectsFormat = "/organizations/<organizationId>/projects";
         //public const string organizationsProjectsProjectFormat =
         //    "/organizations/<organizationId>/projects/<projectId>";
@@ -523,7 +544,7 @@ namespace Ademero.NucleusOneDotNetSdk
 #pragma warning disable CA1031 // Do not catch general exception types
             try
             {
-                message = (string)((JObject)JsonConvert.DeserializeObject(json))["message"];
+                message = (string)((JObject)Common.Util.DeserializeObject(json))["message"];
             }
             catch
             {

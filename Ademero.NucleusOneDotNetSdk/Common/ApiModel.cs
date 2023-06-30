@@ -41,13 +41,13 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
         public static T FromJson(string json)
 #pragma warning restore CA1000  // Do not declare static members on generic types
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+            return Util.DeserializeObject<T>(json);
         }
 
         /// <summary>
         /// Get this object as JSON.
         /// </summary>
-        public virtual string ToJson() => Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        public virtual string ToJson() => Util.SerializeObject(this);
     }
 
     /// <summary>
@@ -56,6 +56,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
     /// https://github.com/google/json_serializable.dart/issues/648
     /// </summary>
     [Serializable]
+    [JsonArray]
     public abstract class EntityCollection<TEntity>: IEnumerable, IEnumerable<TEntity>
         where TEntity : Entity<TEntity>, new()
     {
@@ -90,7 +91,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
         /// <summary>
         /// Get this object as JSON.
         /// </summary>
-        public string ToJson => JsonConvert.SerializeObject(Items);
+        public string ToJson() => Common.Util.SerializeObject(Items);
 
         public IEnumerator GetEnumerator() => Items?.GetEnumerator();
 

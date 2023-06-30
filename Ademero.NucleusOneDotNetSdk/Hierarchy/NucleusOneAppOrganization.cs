@@ -59,7 +59,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             var responseBody = await Http.ExecuteGetRequestWithTextResponse(
                 ApiPaths.OrganizationsPermissionsFormat.ReplaceOrgIdPlaceholder(Id), App);
 
-            var apiModel = JsonConvert.DeserializeObject<ApiMod.OrganizationPermissions>(responseBody);
+            var apiModel = Common.Util.DeserializeObject<ApiMod.OrganizationPermissions>(responseBody);
             return await Util.DefineN1AppInScope(App, () => OrganizationPermissions.FromApiModel(apiModel));
         }
 
@@ -72,7 +72,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             var responseBody = await Http.ExecuteGetRequestWithTextResponse(
                 ApiPaths.OrganizationsOrganizationDocumentSubscriptionsFormat.ReplaceOrgIdPlaceholder(Id), App);
 
-            var apiModel = JsonConvert.DeserializeObject<ApiMod.QueryResult<ApiMod.DocumentSubscriptionForClientCollection>>(responseBody);
+            var apiModel = Common.Util.DeserializeObject<ApiMod.QueryResult<ApiMod.DocumentSubscriptionForClientCollection>>(responseBody);
 
             return await Util.DefineN1AppInScope(App, () =>
             {
@@ -93,7 +93,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             var responseBody = await Http.ExecuteGetRequestWithTextResponse(
                 ApiPaths.OrganizationsSubscriptionsFormat.ReplaceOrgIdPlaceholder(Id), App);
 
-            var apiModel = JsonConvert.DeserializeObject<ApiMod.SubscriptionDetails>(responseBody);
+            var apiModel = Common.Util.DeserializeObject<ApiMod.SubscriptionDetails>(responseBody);
             return await Util.DefineN1AppInScope(App, () => SubscriptionDetails.FromApiModel(apiModel));
         }
 
@@ -110,7 +110,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                 App,
                 qp);
 
-            var apiModel = JsonConvert.DeserializeObject<ApiMod.OrganizationProject>(responseBody);
+            var apiModel = Common.Util.DeserializeObject<ApiMod.OrganizationProject>(responseBody);
             return await Util.DefineN1AppInScope(App, () => OrganizationProject.FromApiModel(apiModel));
         }
         */
