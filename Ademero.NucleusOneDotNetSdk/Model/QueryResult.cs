@@ -37,6 +37,9 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                     mod.OrganizationMembershipPackageCollection.fromApiModel(x),
                 mod.OrganizationPackageCollection: (x) => mod.OrganizationPackageCollection.fromApiModel(x),
                 mod.OrganizationProjectCollection: (x) => mod.OrganizationProjectCollection.fromApiModel(x),
+                */
+                { typeof(Model.SearchResultCollection), (x) => Model.SearchResultCollection.FromApiModel(x) },
+                /*
                 mod.SupportUserCollection: (x) => mod.SupportUserCollection.fromApiModel(x),
                 mod.SupportOrganizationCollection: (x) => mod.SupportOrganizationCollection.fromApiModel(x),
                 mod.SupportErrorEventCollection: (x) => mod.SupportErrorEventCollection.fromApiModel(x),

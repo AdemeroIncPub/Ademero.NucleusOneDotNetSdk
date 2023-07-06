@@ -19,7 +19,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         public string Id { get; set; }
 
         [JsonProperty("OrganizationID")]
-        public string OrganizationID { get; set; }
+        public string OrganizationId { get; set; }
 
         [JsonProperty("AccessType")]
         public string AccessType { get; set; }
@@ -28,7 +28,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         public string CreatedOn { get; set; }
 
         [JsonProperty("CreatedByUserID")]
-        public string CreatedByUserID { get; set; }
+        public string CreatedByUserId { get; set; }
 
         [JsonProperty("CreatedByUserEmail")]
         public string CreatedByUserEmail { get; set; }
@@ -52,7 +52,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         public string PurgeMarkedOn { get; set; }
 
         [JsonProperty("PurgeMarkedByUserID")]
-        public string PurgeMarkedByUserID { get; set; }
+        public string PurgeMarkedByUserId { get; set; }
 
         [JsonProperty("PurgeMarkedByUserName")]
         public string PurgeMarkedByUserName { get; set; }

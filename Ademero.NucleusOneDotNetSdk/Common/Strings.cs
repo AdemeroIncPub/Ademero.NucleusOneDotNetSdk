@@ -147,5 +147,10 @@ namespace Ademero.NucleusOneDotNetSdk.Common.Strings
         {
             return str.Replace("<fieldId>", fieldId);
         }
+
+        internal static string Base64Encode(string text)
+        {
+            return System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(text));
+        }
     }
 }

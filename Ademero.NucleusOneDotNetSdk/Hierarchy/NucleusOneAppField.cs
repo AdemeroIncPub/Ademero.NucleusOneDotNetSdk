@@ -1,8 +1,8 @@
 ﻿using Ademero.NucleusOneDotNetSdk.Common.Strings;
-using Ademero.NucleusOneDotNetSdk.Common;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 {
@@ -11,12 +11,20 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <summary>
         /// The project to perform operations on.
         /// </summary>
-        public NucleusOneAppProject Project { get; }
+        public NucleusOneAppProject Project
+        {
+            [DebuggerStepThrough]
+            get;
+        }
 
         /// <summary>
         /// The field's ID.
         /// </summary>
-        public string Id { get; }
+        public string Id
+        {
+            [DebuggerStepThrough]
+            get;
+        }
 
         /// <summary>
         /// Creates an instance of the <see cref="NucleusOneAppField"/> class.

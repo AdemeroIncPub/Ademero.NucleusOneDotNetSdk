@@ -302,6 +302,22 @@ namespace Ademero.NucleusOneDotNetSdk
             return await clientResponse.Content.ReadAsStringAsync()
                 .ConfigureAwait(true);
         }
+
+        /// <summary>
+        /// Execute an HTTP PUT request, returning the response body.
+        /// </summary>
+        /// <inheritdoc cref="ExecuteStandardHttpRequest" select="param" />
+        public static async Task<HttpResponseMessage> ExecutePutRequest(
+            string apiRelativeUrlPath,
+            Dictionary<string, dynamic> queryParams = null,
+            string body = null,
+            bool authenticated = true,
+            NucleusOneApp app = null
+        )
+        {
+            return await ExecuteStandardHttpRequest(apiRelativeUrlPath, HttpMethod.Put, queryParams, body, authenticated, app)
+                .ConfigureAwait(true);
+        }
     }
 
     /// <summary>
@@ -319,11 +335,12 @@ namespace Ademero.NucleusOneDotNetSdk
         //    "/formTemplatesPublic/<formTemplateId>/fields/<formTemplateFieldId>/listItems";
         //public const string formTemplatesPublicSubmissions = "/formTemplatesPublic/<formTemplateId>/submissions";
         //public const string logs = "/logs";
-        public const string organizationMembers = "/organizations/<organizationId>/members";
+        public const string OrganizationMembers = "/organizations/<organizationId>/members";
         //public const string organizationMembershipPackages = "/organizationMembershipPackages";
         //public const string organizationMembershipPackagesFormat =
         //    "/organizationMembershipPackages/<organizationId>";
-        public const string organizations = "/organizations";
+        public const string Organizations = "/organizations";
+        public const string OrganizationSearchResults = "/organizations/<organizationId>/searchResults";
         //public const string organizationsOrganizationFormat = "/organizations/<organizationId>";
         //public const string organizationsOrganizationDocumentSubscriptionsFormat =
         //    "/organizations/<organizationId>/documentSubscriptions";
@@ -382,8 +399,8 @@ namespace Ademero.NucleusOneDotNetSdk
         //    "/organizations/<organizationId>/projects/<projectId>/recentDocumentSignatureForms";
         public const string OrganizationsProjectsFieldsFormat =
             "/organizations/<organizationId>/projects/<projectId>/fields";
-        //public const string organizationsProjectsFieldsFieldFormat =
-        //    "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>";
+        public const string OrganizationsProjectsFieldsFieldFormat =
+            "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>";
         public const string OrganizationsProjectsFieldsFieldListItemsFormat =
             "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>/listItems";
         public const string OrganizationsProjectsFormat = "/organizations/<organizationId>/projects";

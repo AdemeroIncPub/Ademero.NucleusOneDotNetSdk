@@ -3,6 +3,8 @@ using Ademero.NucleusOneDotNetSdk.Common.Strings;
 using Ademero.NucleusOneDotNetSdk.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -18,12 +20,20 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <summary>
         /// The organization to perform task operations on.
         /// </summary>
-        public NucleusOneAppOrganization Organization { get; }
+        public NucleusOneAppOrganization Organization
+        {
+            [DebuggerStepThrough]
+            get;
+        }
 
         /// <summary>
         /// The project's ID.
         /// </summary>
-        public string Id { get; }
+        public string Id
+        {
+            [DebuggerStepThrough]
+            get;
+        }
 
         /// <summary>
         /// Creates an instance of the <see cref="NucleusOneAppProject"/> class.
@@ -150,7 +160,8 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             qp["documentFolderPathPrefix"] = PathHelper.GetOrganizationLink(Organization.Id,
                 PathHelper.GetWorkspaceDocumentFoldersPath(Id));
 
-            var docFolder = new {
+            var docFolder = new
+            {
                 ParentID = parentId,
                 Name = name,
                 AssignmentUserEmails = Array.Empty<string>(),
@@ -270,7 +281,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             qp["uniqueId"] = docUploadReservation.UniqueId;
             qp["captureOriginal"] = false;
 
-            await Http.ExecutePutRequestWithTextResponse(
+            await Http.ExecutePutRequest(
                 apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentUploadsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
                 app: App,
                 queryParams: qp,
@@ -287,11 +298,56 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         }
 
         /// <summary>
-        /// Gets this project's field, by page.
+        /// Gets a field in this project.
+        /// </summary>
+        /// <param name="cursor">The field's ID.</param>
+        public async Task<Field> GetField(string fieldId)
+        {
+            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFieldFormat
+                    .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this)
+                    .ReplaceFieldIdPlaceholder(fieldId),
+                app: App
+            );
+
+            var apiModel = ApiModel.Field.FromJson(responseBody);
+
+            return Util.DefineN1AppInScope(App, () =>
+            {
+                return Field.FromApiModel(apiModel);
+            });
+        }
+
+        /// <summary>
+        /// Gets this project's fields.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<FieldCollection> GetFields()
+        {
+            var items = new List<FieldCollection>();
+            string cursor = null;
+
+            do
+            {
+                var itemsPaged = await GetFieldsPaged(cursor);
+                var results = itemsPaged.Results;
+
+                if (results.Items.Length == 0)
+                    break;
+
+                items.Add(results);
+                cursor = itemsPaged.Cursor;
+            } while (true);
+
+            var allItems = items.SelectMany(x => x.Items).ToArray();
+            return new FieldCollection(allItems, App);
+        }
+
+        /// <summary>
+        /// Gets this project's fields, by page.
         /// </summary>
         /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
-        public async Task<QueryResult<FieldCollection, Field, ApiModel.FieldCollection, ApiModel.Field>> GetFields(
-            string cursor = null)
+        public async Task<QueryResult<FieldCollection, Field, ApiModel.FieldCollection, ApiModel.Field>> GetFieldsPaged(string cursor)
         {
             var qp = StandardQueryParams.Get(
                 callbacks: new Action<StandardQueryParams>[] {

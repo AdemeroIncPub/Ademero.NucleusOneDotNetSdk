@@ -113,7 +113,9 @@ namespace Ademero.NucleusOneDotNetSdk
         /// <see cref="NucleusOneApp"/> class for details.
         public NucleusOneApp App
         {
+            [DebuggerStepThrough]
             get => _app;
+            [DebuggerStepThrough]
             protected set => _app = value;
         }
     }
@@ -124,7 +126,13 @@ namespace Ademero.NucleusOneDotNetSdk
     public class NucleusOneApp
     {
         public const string ApiBaseUrlPath = "/api/v1";
-        public NucleusOneOptions Options { get; private set; }
+        public NucleusOneOptions Options
+        {
+            [DebuggerStepThrough]
+            get;
+            [DebuggerStepThrough]
+            private set;
+        }
         private readonly string _baseUrlWithApi;
 
         /// <summary>
@@ -152,8 +160,8 @@ namespace Ademero.NucleusOneDotNetSdk
         public Hierarchy.NucleusOneAppOrganization Organization(string organizationId)
         {
             return new Hierarchy.NucleusOneAppOrganization(
-              app: this,
-              id: organizationId
+                app: this,
+                id: organizationId
             );
         }
 
@@ -169,7 +177,7 @@ namespace Ademero.NucleusOneDotNetSdk
                 }
             );
             var responseBody = await Http.ExecuteGetRequestWithTextResponse(
-                    apiRelativeUrlPath: ApiPaths.organizations,
+                    apiRelativeUrlPath: ApiPaths.Organizations,
                     app: this,
                     queryParams: qp
                 )

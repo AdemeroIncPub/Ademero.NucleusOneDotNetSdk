@@ -1,11 +1,9 @@
-﻿using Ademero.NucleusOneDotNetSdk.Common;
-using Ademero.NucleusOneDotNetSdk.Common.Strings;
+﻿using Ademero.NucleusOneDotNetSdk.Common.Strings;
 using Ademero.NucleusOneDotNetSdk.Model;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 {
@@ -17,7 +15,11 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <summary>
         /// The organization ID.
         /// </summary>
-        public string Id { get; }
+        public string Id
+        {
+            [DebuggerStepThrough]
+            get;
+        }
 
         /// <summary>
         /// Creates an instance of the NucleusOneAppOrganization class.
@@ -224,7 +226,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             string body = Common.Util.SerializeObject(users.Items);
 
             string responseBody = await Http.ExecutePostRequestWithTextResponse(
-                    apiRelativeUrlPath: ApiPaths.organizationMembers.ReplaceOrgIdPlaceholder(Id),
+                    apiRelativeUrlPath: ApiPaths.OrganizationMembers.ReplaceOrgIdPlaceholder(Id),
                     queryParams: new Dictionary<string, dynamic>()
                     {
                         { "homePath", Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath()) }

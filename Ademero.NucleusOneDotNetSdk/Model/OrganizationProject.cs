@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Linq;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
@@ -17,10 +16,10 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             return new OrganizationProject(app)
             {
                 Id = apiModel.Id,
-                OrganizationID = apiModel.OrganizationID,
+                OrganizationId = apiModel.OrganizationId,
                 AccessType = apiModel.AccessType,
                 CreatedOn = apiModel.CreatedOn,
-                CreatedByUserID = apiModel.CreatedByUserID,
+                CreatedByUserId = apiModel.CreatedByUserId,
                 CreatedByUserEmail = apiModel.CreatedByUserEmail,
                 CreatedByUserName = apiModel.CreatedByUserName,
                 Name = apiModel.Name,
@@ -28,7 +27,7 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 Disabled = apiModel.Disabled.HasValue ? apiModel.Disabled.Value : false,
                 IsMarkedForPurge = apiModel.IsMarkedForPurge.HasValue ? apiModel.IsMarkedForPurge.Value : false,
                 PurgeMarkedOn = apiModel.PurgeMarkedOn,
-                PurgeMarkedByUserID = apiModel.PurgeMarkedByUserID,
+                PurgeMarkedByUserId = apiModel.PurgeMarkedByUserId,
                 PurgeMarkedByUserName = apiModel.PurgeMarkedByUserName,
                 PurgeMarkedByUserEmail = apiModel.PurgeMarkedByUserEmail
             };
@@ -36,49 +35,34 @@ namespace Ademero.NucleusOneDotNetSdk.Model
 
         #region Properties
 
-        [JsonProperty("id")]
         public string Id { get; set; }
 
-        [JsonProperty("organizationID")]
-        public string OrganizationID { get; set; }
+        public string OrganizationId { get; set; }
 
-        [JsonProperty("accessType")]
         public string AccessType { get; set; }
 
-        [JsonProperty("createdOn")]
         public string CreatedOn { get; set; }
 
-        [JsonProperty("createdByUserID")]
-        public string CreatedByUserID { get; set; }
+        public string CreatedByUserId { get; set; }
 
-        [JsonProperty("createdByUserEmail")]
         public string CreatedByUserEmail { get; set; }
 
-        [JsonProperty("createdByUserName")]
         public string CreatedByUserName { get; set; }
 
-        [JsonProperty("name")]
         public string Name { get; set; }
 
-        [JsonProperty("nameLower")]
         public string NameLower { get; set; }
 
-        [JsonProperty("disabled")]
         public bool Disabled { get; set; }
 
-        [JsonProperty("isMarkedForPurge")]
         public bool IsMarkedForPurge { get; set; }
 
-        [JsonProperty("purgeMarkedOn")]
         public string PurgeMarkedOn { get; set; }
 
-        [JsonProperty("purgeMarkedByUserID")]
-        public string PurgeMarkedByUserID { get; set; }
+        public string PurgeMarkedByUserId { get; set; }
 
-        [JsonProperty("purgeMarkedByUserName")]
         public string PurgeMarkedByUserName { get; set; }
 
-        [JsonProperty("purgeMarkedByUserEmail")]
         public string PurgeMarkedByUserEmail { get; set; }
 
         #endregion
@@ -88,10 +72,10 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             return new ApiModel.OrganizationProject()
             {
                 Id = Id,
-                OrganizationID = OrganizationID,
+                OrganizationId = OrganizationId,
                 AccessType = AccessType,
                 CreatedOn = CreatedOn,
-                CreatedByUserID = CreatedByUserID,
+                CreatedByUserId = CreatedByUserId,
                 CreatedByUserEmail = CreatedByUserEmail,
                 CreatedByUserName = CreatedByUserName,
                 Name = Name,
@@ -99,7 +83,7 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 Disabled = Disabled,
                 IsMarkedForPurge = IsMarkedForPurge,
                 PurgeMarkedOn = PurgeMarkedOn,
-                PurgeMarkedByUserID = PurgeMarkedByUserID,
+                PurgeMarkedByUserId = PurgeMarkedByUserId,
                 PurgeMarkedByUserName = PurgeMarkedByUserName,
                 PurgeMarkedByUserEmail = PurgeMarkedByUserEmail
             };

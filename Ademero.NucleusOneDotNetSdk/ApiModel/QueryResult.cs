@@ -15,7 +15,8 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
             { typeof(ApiModel.FieldCollection), (x) => ApiModel.FieldCollection.FromJson(x) },
             { typeof(ApiModel.OrganizationForClientCollection), (x) => ApiModel.OrganizationForClientCollection.FromJson(x) },
             { typeof(ApiModel.OrganizationMemberCollection), (x) => ApiModel.OrganizationMemberCollection.FromJson(x) },
-            { typeof(ApiModel.OrganizationProjectCollection), (x) => ApiModel.OrganizationProjectCollection.FromJson(x) }
+            { typeof(ApiModel.OrganizationProjectCollection), (x) => ApiModel.OrganizationProjectCollection.FromJson(x) },
+            { typeof(ApiModel.SearchResultCollection), (x) => ApiModel.SearchResultCollection.FromJson(x) }
         };
 
         public QueryResult() { }
