@@ -400,6 +400,49 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                 return createdFields;
             });
         }
+
+        /// <summary>
+        /// Searches for documents in this project.
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public async Task<QueryResult<SearchResultCollection, SearchResult, ApiModel.SearchResultCollection, ApiModel.SearchResult>>
+            SearchDocuments(Dictionary<string, string> fieldIdsAndValues)
+        {
+            // Convert each input search field into the expected JSON object
+            var fieldIdsAndValuesJsonObjects = fieldIdsAndValues.Select(x =>
+            {
+                return new
+                {
+                    FieldID = "IxF_Text[" + x.Key + "].keyword",
+                    FieldType = "FieldType_Text",
+                    FieldValue = x.Value,
+                    Operator = "equals"
+                };
+            });
+
+            var qp = StandardQueryParams.Get();
+
+            // Only search documents
+            qp["contentType"] = "Document";
+            qp["metaFieldFilters_json"] = Common.Util.SerializeObject(fieldIdsAndValuesJsonObjects);
+
+            string responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationSearchResults
+                        .ReplaceOrgIdPlaceholder(Organization.Id),
+                    app: App,
+                    queryParams: qp
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.QueryResult<ApiModel.SearchResultCollection>.FromJson(responseBody);
+
+            return Util.DefineN1AppInScope(App, () =>
+            {
+                return QueryResult<SearchResultCollection, SearchResult, ApiModel.SearchResultCollection, ApiModel.SearchResult>
+                    .FromApiModel(apiModel);
+            });
+        }
     }
 
     public enum ProjectAccessType
