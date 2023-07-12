@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ademero.NucleusOneDotNetSdk.Hierarchy;
+using System;
 using System.Linq;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
@@ -40,6 +41,16 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         public string OrganizationId { get; set; }
 
         public string AccessType { get; set; }
+
+        public ProjectAccessType AccessTypeEnum
+        {
+            get
+            {
+                return (AccessType == "MembersOnlyAssignments_MemberContentByAssignment")
+                    ? ProjectAccessType.Restrictive
+                    : ProjectAccessType.Permissive;
+            }
+        }
 
         public string CreatedOn { get; set; }
 

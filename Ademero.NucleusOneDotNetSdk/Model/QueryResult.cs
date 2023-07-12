@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
 {
@@ -10,67 +11,30 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         where TModelCollection : Common.Model.EntityCollection<TModel, TApiModelCollection>
         where TModel : Common.Model.Entity<TApiModel>
     {
-        private static readonly Dictionary<Type, Func<dynamic, object>> _fromApiModelFactories =
-            new Dictionary<Type, Func<dynamic, object>>()
-            {
-                /*
-                ...QueryResult2._fromApiModelFactories, // Include factories from the QueryResult2 class
-                mod.DocumentCollection: (x) => mod.DocumentCollection.fromApiModel(x),
-                */
-                { typeof(Model.DocumentFolderCollection), (x) => Model.DocumentFolderCollection.FromApiModel(x) },
-                /*
-                mod.DocumentSubscriptionForClientCollection: (x) =>
-                    mod.DocumentSubscriptionForClientCollection.fromApiModel(x),
-                */
-                { typeof(Model.FieldCollection), (x) => Model.FieldCollection.FromApiModel(x) },
-                /*
-                mod.ApprovalCollection: (x) => mod.ApprovalCollection.fromApiModel(x),
-                mod.FolderHierarchyCollection: (x) => mod.FolderHierarchyCollection.fromApiModel(x),
-                mod.FormTemplateCollection: (x) => mod.FormTemplateCollection.fromApiModel(x),
-                mod.TaskCollection: (x) => mod.TaskCollection.fromApiModel(x),
-                */
-                { typeof(Model.OrganizationForClientCollection), (x) => Model.OrganizationForClientCollection.FromApiModel(x) },
-                { typeof(Model.OrganizationMemberCollection), (x) => Model.OrganizationMemberCollection.FromApiModel(x) },
-                { typeof(Model.OrganizationProjectCollection), (x) => Model.OrganizationProjectCollection.FromApiModel(x) },
-                /*
-                mod.OrganizationMembershipPackageCollection: (x) =>
-                    mod.OrganizationMembershipPackageCollection.fromApiModel(x),
-                mod.OrganizationPackageCollection: (x) => mod.OrganizationPackageCollection.fromApiModel(x),
-                mod.OrganizationProjectCollection: (x) => mod.OrganizationProjectCollection.fromApiModel(x),
-                */
-                { typeof(Model.SearchResultCollection), (x) => Model.SearchResultCollection.FromApiModel(x) },
-                /*
-                mod.SupportUserCollection: (x) => mod.SupportUserCollection.fromApiModel(x),
-                mod.SupportOrganizationCollection: (x) => mod.SupportOrganizationCollection.fromApiModel(x),
-                mod.SupportErrorEventCollection: (x) => mod.SupportErrorEventCollection.fromApiModel(x),
-                mod.UserOrganizationProjectCollection: (x) =>
-                    mod.UserOrganizationProjectCollection.fromApiModel(x),
-                */
-            };
+        private static FromApiModelDelegate _fromApiModelFactory;
+
+        private delegate TModelCollection FromApiModelDelegate(TApiModelCollection apiModel, NucleusOneApp app);
+
+        // This is invoked once for each derived, concrete class
+        static QueryResult()
+        {
+            var fromApiModelMethod = typeof(TModelCollection).GetMethod("FromApiModel",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.FlattenHierarchy);
+
+            if (fromApiModelMethod == null)
+                throw new NotImplementedException($"The {typeof(TModelCollection)}.FromApiModel factory constructor was not found.");
+
+            _fromApiModelFactory = (FromApiModelDelegate)
+                Delegate.CreateDelegate(typeof(FromApiModelDelegate), null, fromApiModelMethod);
+        }
 
         private static TQueryResult ResultsFromApiModelInternal<TQueryResult>(
             bool isQueryResult2,
-            Func<dynamic, Func<dynamic, object>, TQueryResult> qrFromApiModelHandler,
-            Dictionary<Type, Func<dynamic, object>> fromApiModelFactories,
+            Func<dynamic, FromApiModelDelegate, TQueryResult> qrFromApiModelHandler,
             dynamic apiModel
         )
         {
-            Func<dynamic, object> fromApiModel = null;
-
-            if (fromApiModelFactories.ContainsKey(typeof(TModelCollection)))
-            {
-                fromApiModel = fromApiModelFactories[typeof(TModelCollection)];
-            }
-
-            if (fromApiModel == null)
-            {
-                string className = isQueryResult2 ? "QueryResult2" : "QueryResult";
-                throw new NotImplementedException(
-                    $"The {typeof(TModelCollection)}.FromApiModel factory constructor must be explicitly registered in the model {className} class.");
-            }
-
-            TQueryResult result = qrFromApiModelHandler(apiModel, fromApiModel);
-            return result;
+            return qrFromApiModelHandler(apiModel, _fromApiModelFactory);
         }
 
         protected QueryResult(
@@ -92,24 +56,25 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         {
             //return _resultsFromApiModel<QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel>>(
             //    false, _fromApiModel, _fromApiModelFactories, apiModel);
-            var fromApiModelLocal = new Func<dynamic, Func<dynamic, object>, QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel>>(
+            var fromApiModelLocal = new Func<dynamic, FromApiModelDelegate, QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel>>(
                 (apiModelLocal, fromApiModelHandler) =>
                     FromApiModelInternal<QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel>>(apiModelLocal, fromApiModelHandler)
             );
 
             return ResultsFromApiModelInternal<QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel>>(
-                false, fromApiModelLocal, _fromApiModelFactories, apiModel);
+                false, fromApiModelLocal, apiModel);
         }
 
         private static TQueryResult FromApiModelInternal<TQueryResult>(
             dynamic apiModel,
-            Func<dynamic, object> fromApiModel
+            FromApiModelDelegate fromApiModel
         )
             where TQueryResult : QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel>
         {
+            NucleusOneApp n1App = null;
             return (TQueryResult)
                 new QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel>(
-                    results: fromApiModel(apiModel.Results) as TModelCollection,
+                    results: fromApiModel(apiModel.Results, n1App) as TModelCollection,
                     cursor: apiModel.Cursor,
                     pageSize: apiModel.PageSize
                 );

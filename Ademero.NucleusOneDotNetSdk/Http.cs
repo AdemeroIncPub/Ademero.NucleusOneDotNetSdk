@@ -408,6 +408,8 @@ namespace Ademero.NucleusOneDotNetSdk
         //    "/organizations/<organizationId>/projects/<projectId>";
         //public const string organizationsProjectsFormTemplatesFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/formTemplates";
+        public const string OrganizationsProjectsMembersFormat =
+            "/organizations/<organizationId>/projects/<projectId>/members";
         //public const string organizationsProjectsSignatureFormTemplatesFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/signatureFormTemplates";
         //public const string organizationsProjectsSignatureFormTemplatesSignatureFormTemplateFormat =

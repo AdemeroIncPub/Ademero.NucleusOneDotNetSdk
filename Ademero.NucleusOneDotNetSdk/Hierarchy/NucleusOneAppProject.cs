@@ -75,7 +75,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <param name="contentType">The content type of the file.</param>
         /// <param name="file">The file to upload.</param>
         /// <returns>A task representing the asynchronous upload operation.</returns>
-        private async Task UploadFileToGcsFromUrl(string gcsPublicReservationUrl, string contentType, byte[] file)
+        private static async Task UploadFileToGcsFromUrl(string gcsPublicReservationUrl, string contentType, byte[] file)
         {
             var apiUri = new Uri(gcsPublicReservationUrl);
             var httpClient = Http.GetStandardHttpClient();
@@ -199,23 +199,38 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <returns></returns>
         public async Task<DocumentFolderCollection> GetDocumentFolders(string parentId = null)
         {
-            var docFolders = new List<DocumentFolderCollection>();
+            Func<string, Task<dynamic>> getNextPageHandler = async (string cursor) =>
+                await GetDocumentFoldersPaged(parentId, cursor);
+            DocumentFolder[] allResults = await GetEntitiesByPages<DocumentFolder, DocumentFolderCollection>(
+                getNextPageHandler
+            );
+            return new DocumentFolderCollection(allResults, App);
+        }
+
+        // TODO: This would be better-handled by explicitly specifying generic type arguments
+        private static async Task<TModel[]> GetEntitiesByPages<TModel, TModelCollection>(
+            Func<string, Task<dynamic>> getNextPageOfQueryResultHandler
+        )
+            where TModelCollection : IEnumerable<TModel>
+        {
+            var allEntityCollectionResults = new List<TModelCollection>();
             string cursor = null;
 
             do
             {
-                var docFoldersPaged = await GetDocumentFoldersPaged(parentId, cursor);
-                var results = docFoldersPaged.Results;
+                var resultsPaged = await getNextPageOfQueryResultHandler(cursor);
+                var results = resultsPaged.Results;
 
-                if (results.Items.Length == 0)
+                if (((Array)results.Items).Length == 0)
                     break;
 
-                docFolders.Add(results);
-                cursor = docFoldersPaged.Cursor;
+                allEntityCollectionResults.Add(results);
+                cursor = resultsPaged.Cursor;
             } while (true);
 
-            var allFolders = docFolders.SelectMany(x => x.Items).ToArray();
-            return new DocumentFolderCollection(allFolders, App);
+            return allEntityCollectionResults
+                .SelectMany(x => (IEnumerable<TModel>)((dynamic)x).Items)
+                .ToArray();
         }
 
         /// <summary>
@@ -324,23 +339,12 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <returns></returns>
         public async Task<FieldCollection> GetFields()
         {
-            var items = new List<FieldCollection>();
-            string cursor = null;
-
-            do
-            {
-                var itemsPaged = await GetFieldsPaged(cursor);
-                var results = itemsPaged.Results;
-
-                if (results.Items.Length == 0)
-                    break;
-
-                items.Add(results);
-                cursor = itemsPaged.Cursor;
-            } while (true);
-
-            var allItems = items.SelectMany(x => x.Items).ToArray();
-            return new FieldCollection(allItems, App);
+            Func<string, Task<dynamic>> getNextPageHandler = async (string cursor) =>
+                await GetFieldsPaged(cursor);
+            Field[] allResults = await GetEntitiesByPages<Field, FieldCollection>(
+                getNextPageHandler
+            );
+            return new FieldCollection(allResults, App);
         }
 
         /// <summary>
@@ -441,6 +445,85 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             {
                 return QueryResult<SearchResultCollection, SearchResult, ApiModel.SearchResultCollection, ApiModel.SearchResult>
                     .FromApiModel(apiModel);
+            });
+        }
+
+        /// <summary>
+        /// Gets members of the current project.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ProjectMemberCollection> GetMembers()
+        {
+            Func<string, Task<dynamic>> getNextPageHandler = async (string cursor) =>
+                await GetMembersPaged(cursor);
+            ProjectMember[] allResults = await GetEntitiesByPages<ProjectMember, ProjectMemberCollection>(
+                getNextPageHandler
+            );
+            return new ProjectMemberCollection(allResults, App);
+        }
+
+        /// <summary>
+        /// Gets members of the current project, by page.
+        /// </summary>
+        /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
+        public async Task<QueryResult<ProjectMemberCollection, ProjectMember, ApiModel.ProjectMemberCollection, ApiModel.ProjectMember>> GetMembersPaged(string cursor)
+        {
+            var qp = StandardQueryParams.Get(
+                callbacks: new Action<StandardQueryParams>[] {
+                    (sqp) => sqp.Cursor(cursor)
+                }
+            );
+
+            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                apiRelativeUrlPath: ApiPaths.OrganizationsProjectsMembersFormat
+                    .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                app: App,
+                queryParams: qp
+            );
+
+            var apiModel = ApiModel.QueryResult<ApiModel.ProjectMemberCollection>.FromJson(responseBody);
+
+            return Util.DefineN1AppInScope(App, () =>
+            {
+                return QueryResult<ProjectMemberCollection, ProjectMember, ApiModel.ProjectMemberCollection, ApiModel.ProjectMember>
+                    .FromApiModel(apiModel);
+            });
+        }
+
+        /// <summary>
+        /// Adds organization members to this project.
+        /// </summary>
+        /// <param name="members"></param>
+        /// <returns></returns>
+        public async Task<Model.ProjectMemberCollection> AddMembers(Model.ProjectMemberCollection members)
+        {
+            var qp = StandardQueryParams.Get();
+            qp["homePath"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath());
+            qp["projectPath"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetProjectPath(Id));
+
+            string body = Util.SerializeObject(members);
+
+            string responseBody = await Http.ExecutePostRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsMembersFormat
+                    .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                    app: App,
+                    queryParams: qp,
+                    body: body
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.ProjectMemberCollection.FromJsonArray(
+                arrayItemsJson: responseBody,
+                instance: new ApiModel.ProjectMemberCollection(),
+                entityFromJsonCallback: (x) => ApiModel.ProjectMember.FromJson(x)
+            );
+
+            return Util.DefineN1AppInScope(App, () =>
+            {
+                var createdProjectMembers = Model.ProjectMemberCollection.FromApiModel(apiModel);
+                if ((createdProjectMembers == null) || (createdProjectMembers.Items.Length == 0))
+                    return null;
+                return createdProjectMembers;
             });
         }
     }

@@ -19,6 +19,11 @@
             return "/projects";
         }
 
+        public static string GetProjectPath(string projectId)
+        {
+            return $"{GetProjectsPath()}/{projectId}";
+        }
+
         public static string GetHomePath()
         {
             return "/home";

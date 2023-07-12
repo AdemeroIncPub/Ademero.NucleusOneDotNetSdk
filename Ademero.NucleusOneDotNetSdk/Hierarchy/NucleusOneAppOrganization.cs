@@ -182,6 +182,10 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         public async Task<Model.OrganizationProject> CreateProject(string projectName, ProjectAccessType accessType,
             string templateId = null, bool sourceContentCopy = false)
         {
+            var qp = StandardQueryParams.Get();
+            qp["homePath"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath());
+            qp["projectPathPrefix"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetProjectsPath());
+
             string body = Common.Util.SerializeObject(
                 new[] {
                     new {
@@ -196,11 +200,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 
             string responseBody = await Http.ExecutePostRequestWithTextResponse(
                     apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFormat.ReplaceOrgIdPlaceholder(Id),
-                    queryParams: new Dictionary<string, dynamic>()
-                    {
-                        { "homePath", Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath()) },
-                        { "projectPathPrefix", Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath()) }
-                    },
+                    queryParams: qp,
                     app: App,
                     body: body
                 )
@@ -221,16 +221,40 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             });
         }
 
+        public async Task<Model.OrganizationMemberCollection> GetMembers()
+        {
+            var qp = StandardQueryParams.Get();
+            qp["homePath"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath());
+
+            string responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationMembers.ReplaceOrgIdPlaceholder(Id),
+                    queryParams: qp,
+                    app: App
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.OrganizationMemberCollection.FromJsonArray(
+                arrayItemsJson: responseBody,
+                instance: new ApiModel.OrganizationMemberCollection(),
+                entityFromJsonCallback: (x) => ApiModel.OrganizationMember.FromJson(x)
+            );
+
+            return Common.Util.DefineN1AppInScope(App, () =>
+            {
+                return Model.OrganizationMemberCollection.FromApiModel(apiModel);
+            });
+        }
+
         public async Task<Model.OrganizationMemberCollection> AddMembers(Model.OrganizationMemberCollection users)
         {
+            var qp = StandardQueryParams.Get();
+            qp["homePath"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath());
+
             string body = Common.Util.SerializeObject(users.Items);
 
             string responseBody = await Http.ExecutePostRequestWithTextResponse(
                     apiRelativeUrlPath: ApiPaths.OrganizationMembers.ReplaceOrgIdPlaceholder(Id),
-                    queryParams: new Dictionary<string, dynamic>()
-                    {
-                        { "homePath", Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath()) }
-                    },
+                    queryParams: qp,
                     app: App,
                     body: body
                 )
