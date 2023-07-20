@@ -41,13 +41,13 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
         public static T FromJson(string json)
 #pragma warning restore CA1000  // Do not declare static members on generic types
         {
-            return Util.DeserializeObject<T>(json);
+            return Util.JsonDeserializeObject<T>(json);
         }
 
         /// <summary>
         /// Get this object as JSON.
         /// </summary>
-        public virtual string ToJson() => Util.SerializeObject(this);
+        public virtual string ToJson() => Util.JsonSerializeObject(this);
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ namespace Ademero.NucleusOneDotNetSdk.Common.ApiModel
         /// <summary>
         /// Get this object as JSON.
         /// </summary>
-        public string ToJson() => Common.Util.SerializeObject(Items);
+        public string ToJson() => Common.Util.JsonSerializeObject(Items);
 
         public IEnumerator GetEnumerator() => Items?.GetEnumerator();
 

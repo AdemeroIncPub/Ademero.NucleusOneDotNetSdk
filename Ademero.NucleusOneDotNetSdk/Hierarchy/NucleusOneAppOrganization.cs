@@ -1,4 +1,5 @@
-﻿using Ademero.NucleusOneDotNetSdk.Common.Strings;
+﻿using Ademero.NucleusOneDotNetSdk.Common;
+using Ademero.NucleusOneDotNetSdk.Common.Strings;
 using Ademero.NucleusOneDotNetSdk.Model;
 using System;
 using System.Collections.Generic;
@@ -118,7 +119,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         */
 
         /// <summary>
-        /// Gets projects that the current user is a member of, by page.
+        /// Getsa all projects that the current user is a member of.
         /// </summary>
         /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
         /// <param name="projectAccessType">
@@ -129,43 +130,36 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <param name="nameFilter">Filters results to only those projects starting with this value.</param>
         /// <param name="getAll">Returns all projects in a single results, without using paging.</param>
         /// <param name="adminOnly">If true, only projects that the current user is an administrator of will be returned.</param>
-        public async Task<QueryResult<OrganizationProjectCollection, OrganizationProject, ApiModel.OrganizationProjectCollection, ApiModel.OrganizationProject>> GetProjects(
+        public async Task<OrganizationProjectCollection> GetAllProjects(
+            string projectAccessType = null, string nameFilter = null, bool? getAll = null, bool? adminOnly = null
+        )
+        {
+            Func<string, Task<dynamic>> getNextPageHandler = async (string cursor) =>
+                await GetProjectsPaged(cursor, projectAccessType, nameFilter, getAll, adminOnly);
+            OrganizationProject[] allResults = await GetAllEntitiesByPages<OrganizationProject, OrganizationProjectCollection>(
+                getNextPageHandler
+            );
+            return new OrganizationProjectCollection(allResults, App);
+        }
+
+        /// <summary>
+        /// Gets projects that the current user is a member of, by page.
+        /// </summary>
+        /// <inheritdoc cref="GetAllProjects" />
+        public async Task<QueryResult<OrganizationProjectCollection, OrganizationProject, ApiModel.OrganizationProjectCollection, ApiModel.OrganizationProject>> GetProjectsPaged(
             string cursor = null, string projectAccessType = null, string nameFilter = null, bool? getAll = null, bool? adminOnly = null)
         {
-            var qp = StandardQueryParams.Get(
-                callbacks: new Action<StandardQueryParams>[] {
-                    (sqp) => sqp.Cursor(cursor)
-                }
+            var apiRelativeUrlPath = ApiPaths.OrganizationsProjectsFormat.ReplaceOrgIdPlaceholder(Id);
+            Action<Dictionary<string, dynamic>> qpCallback = (qp) =>
+            {
+                Util.SetDictionaryValueIfNotNull(qp, "projectAccessType", projectAccessType);
+                Util.SetDictionaryValueIfNotNull(qp, "nameFilter", nameFilter);
+                Util.SetDictionaryValueIfNotNull(qp, "getAll", getAll);
+                Util.SetDictionaryValueIfNotNull(qp, "adminOnly", adminOnly);
+            };
+            return await GetItemsPaged<OrganizationProjectCollection, OrganizationProject, ApiModel.OrganizationProjectCollection, ApiModel.OrganizationProject>(
+                apiRelativeUrlPath, qpCallback, cursor
             );
-
-            if (projectAccessType != null)
-            {
-                qp["projectAccessType"] = projectAccessType;
-            }
-            if (nameFilter != null)
-            {
-                qp["nameFilter"] = nameFilter;
-            }
-            if (getAll != null)
-            {
-                qp["getAll"] = getAll;
-            }
-            if (adminOnly != null)
-            {
-                qp["adminOnly"] = adminOnly;
-            }
-            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
-                apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFormat.ReplaceOrgIdPlaceholder(Id),
-                app: App,
-                queryParams: qp
-            );
-
-            var apiModel = ApiModel.QueryResult<ApiModel.OrganizationProjectCollection>.FromJson(responseBody);
-
-            return Common.Util.DefineN1AppInScope(App, () => {
-                return QueryResult<OrganizationProjectCollection, OrganizationProject, ApiModel.OrganizationProjectCollection, ApiModel.OrganizationProject>
-                    .FromApiModel(apiModel);
-            });
         }
 
         /*
@@ -186,7 +180,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             qp["homePath"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath());
             qp["projectPathPrefix"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetProjectsPath());
 
-            string body = Common.Util.SerializeObject(
+            string body = Common.Util.JsonSerializeObject(
                 new[] {
                     new {
                         Name = projectName,
@@ -221,6 +215,22 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             });
         }
 
+        public async Task DeleteProject(string projectId)
+        {
+            string body = Common.Util.JsonSerializeObject(
+                new
+                {
+                    IDs = new string[] { projectId }
+                });
+
+            await Http.ExecuteDeleteRequest(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFormat.ReplaceOrgIdPlaceholder(Id),
+                    app: App,
+                    body: body
+                )
+                .ConfigureAwait(true);
+        }
+
         public async Task<Model.OrganizationMemberCollection> GetMembers()
         {
             var qp = StandardQueryParams.Get();
@@ -250,7 +260,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             var qp = StandardQueryParams.Get();
             qp["homePath"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath());
 
-            string body = Common.Util.SerializeObject(users.Items);
+            string body = Common.Util.JsonSerializeObject(users.Items);
 
             string responseBody = await Http.ExecutePostRequestWithTextResponse(
                     apiRelativeUrlPath: ApiPaths.OrganizationMembers.ReplaceOrgIdPlaceholder(Id),

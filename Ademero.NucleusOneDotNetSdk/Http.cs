@@ -287,6 +287,22 @@ namespace Ademero.NucleusOneDotNetSdk
         }
 
         /// <summary>
+        /// Execute an HTTP DELETE request.
+        /// </summary>
+        /// <inheritdoc cref="ExecutePostRequest" />
+        public static async Task<HttpResponseMessage> ExecuteDeleteRequest(
+            string apiRelativeUrlPath,
+            Dictionary<string, dynamic> queryParams = null,
+            string body = null,
+            bool authenticated = true,
+            NucleusOneApp app = null
+        )
+        {
+            return await ExecuteStandardHttpRequest(apiRelativeUrlPath, HttpMethod.Delete, queryParams, body, authenticated, app)
+                .ConfigureAwait(true);
+        }
+
+        /// <summary>
         /// Execute an HTTP PUT request, returning the response body.
         /// </summary>
         /// <inheritdoc cref="ExecuteStandardHttpRequest" select="param" />
@@ -341,7 +357,7 @@ namespace Ademero.NucleusOneDotNetSdk
         //    "/organizationMembershipPackages/<organizationId>";
         public const string Organizations = "/organizations";
         public const string OrganizationSearchResults = "/organizations/<organizationId>/searchResults";
-        //public const string organizationsOrganizationFormat = "/organizations/<organizationId>";
+        public const string OrganizationsOrganizationFormat = "/organizations/<organizationId>";
         //public const string organizationsOrganizationDocumentSubscriptionsFormat =
         //    "/organizations/<organizationId>/documentSubscriptions";
         //public const string organizationsPermissionsFormat = "/organizations/<organizationId>/permissions";
@@ -404,8 +420,8 @@ namespace Ademero.NucleusOneDotNetSdk
         public const string OrganizationsProjectsFieldsFieldListItemsFormat =
             "/organizations/<organizationId>/projects/<projectId>/fields/<fieldId>/listItems";
         public const string OrganizationsProjectsFormat = "/organizations/<organizationId>/projects";
-        //public const string organizationsProjectsProjectFormat =
-        //    "/organizations/<organizationId>/projects/<projectId>";
+        public const string OrganizationsProjectsProjectFormat =
+            "/organizations/<organizationId>/projects/<projectId>";
         //public const string organizationsProjectsFormTemplatesFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/formTemplates";
         public const string OrganizationsProjectsMembersFormat =
@@ -563,7 +579,7 @@ namespace Ademero.NucleusOneDotNetSdk
 #pragma warning disable CA1031 // Do not catch general exception types
             try
             {
-                message = (string)((JObject)Common.Util.DeserializeObject(json))["message"];
+                message = (string)((JObject)Common.Util.JsonDeserializeObject(json))["message"];
             }
             catch
             {

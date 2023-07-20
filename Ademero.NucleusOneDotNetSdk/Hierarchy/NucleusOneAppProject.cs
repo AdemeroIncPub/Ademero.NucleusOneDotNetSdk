@@ -172,7 +172,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                     apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentFoldersFormat
                         .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
                     app: App,
-                    body: Util.SerializeObject(new[] { docFolder }, null),
+                    body: Util.JsonSerializeObject(new[] { docFolder }, null),
                     queryParams: qp
                 )
                 .ConfigureAwait(true);
@@ -197,40 +197,14 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// </summary>
         /// <param name="parentId">The ID of the parent folder in the hierarchy.</param>
         /// <returns></returns>
-        public async Task<DocumentFolderCollection> GetDocumentFolders(string parentId = null)
+        public async Task<DocumentFolderCollection> GetAllDocumentFolders(string parentId = null)
         {
             Func<string, Task<dynamic>> getNextPageHandler = async (string cursor) =>
                 await GetDocumentFoldersPaged(parentId, cursor);
-            DocumentFolder[] allResults = await GetEntitiesByPages<DocumentFolder, DocumentFolderCollection>(
+            DocumentFolder[] allResults = await GetAllEntitiesByPages<DocumentFolder, DocumentFolderCollection>(
                 getNextPageHandler
             );
             return new DocumentFolderCollection(allResults, App);
-        }
-
-        // TODO: This would be better-handled by explicitly specifying generic type arguments
-        private static async Task<TModel[]> GetEntitiesByPages<TModel, TModelCollection>(
-            Func<string, Task<dynamic>> getNextPageOfQueryResultHandler
-        )
-            where TModelCollection : IEnumerable<TModel>
-        {
-            var allEntityCollectionResults = new List<TModelCollection>();
-            string cursor = null;
-
-            do
-            {
-                var resultsPaged = await getNextPageOfQueryResultHandler(cursor);
-                var results = resultsPaged.Results;
-
-                if (((Array)results.Items).Length == 0)
-                    break;
-
-                allEntityCollectionResults.Add(results);
-                cursor = resultsPaged.Cursor;
-            } while (true);
-
-            return allEntityCollectionResults
-                .SelectMany(x => (IEnumerable<TModel>)((dynamic)x).Items)
-                .ToArray();
         }
 
         /// <summary>
@@ -242,31 +216,14 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         public async Task<QueryResult<DocumentFolderCollection, DocumentFolder, ApiModel.DocumentFolderCollection, ApiModel.DocumentFolder>>
             GetDocumentFoldersPaged(string parentId = null, string cursor = null)
         {
-            var qp = StandardQueryParams.Get(
-                callbacks: new Action<StandardQueryParams>[] {
-                    (sqp) => sqp.Cursor(cursor)
-                }
+            string apiRelativeUrlPath = ApiPaths.OrganizationsProjectsDocumentFoldersFormat
+                    .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this);
+            var qpCallback = string.IsNullOrEmpty(parentId)
+                ? (Action<Dictionary<string, dynamic>>)null
+                : (qp) => qp["parentId"] = parentId;
+            return await GetItemsPaged<DocumentFolderCollection, DocumentFolder, ApiModel.DocumentFolderCollection, ApiModel.DocumentFolder>(
+                apiRelativeUrlPath, qpCallback, cursor
             );
-
-            if (!string.IsNullOrEmpty(parentId))
-            {
-                qp["parentId"] = parentId;
-            }
-
-            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
-                apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentFoldersFormat
-                    .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
-                app: App,
-                queryParams: qp
-            );
-
-            var apiModel = ApiModel.QueryResult<ApiModel.DocumentFolderCollection>.FromJson(responseBody);
-
-            return Util.DefineN1AppInScope(App, () =>
-            {
-                return QueryResult<DocumentFolderCollection, DocumentFolder, ApiModel.DocumentFolderCollection, ApiModel.DocumentFolder>
-                    .FromApiModel(apiModel);
-            });
         }
 
         /// <summary>
@@ -300,7 +257,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                 apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentUploadsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
                 app: App,
                 queryParams: qp,
-                body: Util.SerializeObject(new[] { docUploadReservation.ToApiModel() })
+                body: Util.JsonSerializeObject(new[] { docUploadReservation.ToApiModel() })
             );
         }
 
@@ -334,14 +291,40 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         }
 
         /// <summary>
+        /// Updates a field in this project.
+        /// </summary>
+        /// <param name="field">The existing field to update.</param>
+        /// <returns>The updated field, as it exists in Nucleus One.</returns>
+        public async Task<Model.Field> UpdateField(Model.Field field)
+        {
+            string body = Util.JsonSerializeObject(field);
+
+            string responseBody = await Http.ExecutePutRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFieldFormat
+                        .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this)
+                        .ReplaceFieldIdPlaceholder(field.Id),
+                    app: App,
+                    body: body
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.Field.FromJson(responseBody);
+
+            return Util.DefineN1AppInScope(App, () =>
+            {
+                return Model.Field.FromApiModel(apiModel);
+            });
+        }
+
+        /// <summary>
         /// Gets this project's fields.
         /// </summary>
         /// <returns></returns>
-        public async Task<FieldCollection> GetFields()
+        public async Task<FieldCollection> GetAllFields()
         {
             Func<string, Task<dynamic>> getNextPageHandler = async (string cursor) =>
                 await GetFieldsPaged(cursor);
-            Field[] allResults = await GetEntitiesByPages<Field, FieldCollection>(
+            Field[] allResults = await GetAllEntitiesByPages<Field, FieldCollection>(
                 getNextPageHandler
             );
             return new FieldCollection(allResults, App);
@@ -353,25 +336,11 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
         public async Task<QueryResult<FieldCollection, Field, ApiModel.FieldCollection, ApiModel.Field>> GetFieldsPaged(string cursor)
         {
-            var qp = StandardQueryParams.Get(
-                callbacks: new Action<StandardQueryParams>[] {
-                    (sqp) => sqp.Cursor(cursor)
-                }
+            var apiRelativeUrlPath = ApiPaths.OrganizationsProjectsFieldsFormat
+                .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this);
+            return await GetItemsPaged<FieldCollection, Field, ApiModel.FieldCollection, ApiModel.Field>(
+                apiRelativeUrlPath, null, cursor
             );
-
-            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
-                apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
-                app: App,
-                queryParams: qp
-            );
-
-            var apiModel = ApiModel.QueryResult<ApiModel.FieldCollection>.FromJson(responseBody);
-
-            return Util.DefineN1AppInScope(App, () =>
-            {
-                return QueryResult<FieldCollection, Field, ApiModel.FieldCollection, ApiModel.Field>
-                    .FromApiModel(apiModel);
-            });
         }
 
         /// <summary>
@@ -381,7 +350,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <returns></returns>
         public async Task<Model.FieldCollection> CreateFields(Model.FieldCollection fields)
         {
-            string body = Util.SerializeObject(fields);
+            string body = Util.JsonSerializeObject(fields);
             
             string responseBody = await Http.ExecutePostRequestWithTextResponse(
                     apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
@@ -402,6 +371,47 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                 if ((createdFields == null) || (createdFields.Items.Length == 0))
                     return null;
                 return createdFields;
+            });
+        }
+
+        /// <summary>
+        /// Gets a project member by email address.
+        /// </summary>
+        /// <param name="emailAddress"></param>
+        /// <returns></returns>
+        public async Task<ProjectMember> GetMemberByEmailAddess(string emailAddress)
+        {
+            // Convert each input search field into the expected JSON object
+            var metaFieldFiltersJsonObjects = new dynamic[] {
+                // Find members with this exact email address
+                new {
+                    FieldID = "Meta_text_kw256lc[UserEmail].keyword",
+                    FieldType = "FieldType_Text",
+                    FieldValue = emailAddress,
+                    Operator = "equals"
+                }
+            };
+
+            var qp = StandardQueryParams.Get();
+            qp["metaFieldFilters_json"] = Common.Util.JsonSerializeObject(metaFieldFiltersJsonObjects);
+
+            string responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsMembersFormat
+                        .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                    app: App,
+                    queryParams: qp
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.QueryResult<ApiModel.ProjectMemberCollection>.FromJson(responseBody);
+            var projectMembers = apiModel.Results.ProjectMembers;
+
+            if (projectMembers.Length == 0)
+                return null;
+
+            return Util.DefineN1AppInScope(App, () =>
+            {
+                return ProjectMember.FromApiModel(apiModel.Results.ProjectMembers[0]);
             });
         }
 
@@ -429,7 +439,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 
             // Only search documents
             qp["contentType"] = "Document";
-            qp["metaFieldFilters_json"] = Common.Util.SerializeObject(fieldIdsAndValuesJsonObjects);
+            qp["metaFieldFilters_json"] = Common.Util.JsonSerializeObject(fieldIdsAndValuesJsonObjects);
 
             string responseBody = await Http.ExecuteGetRequestWithTextResponse(
                     apiRelativeUrlPath: ApiPaths.OrganizationSearchResults
@@ -452,11 +462,11 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// Gets members of the current project.
         /// </summary>
         /// <returns></returns>
-        public async Task<ProjectMemberCollection> GetMembers()
+        public async Task<ProjectMemberCollection> GetAllMembers()
         {
             Func<string, Task<dynamic>> getNextPageHandler = async (string cursor) =>
                 await GetMembersPaged(cursor);
-            ProjectMember[] allResults = await GetEntitiesByPages<ProjectMember, ProjectMemberCollection>(
+            ProjectMember[] allResults = await GetAllEntitiesByPages<ProjectMember, ProjectMemberCollection>(
                 getNextPageHandler
             );
             return new ProjectMemberCollection(allResults, App);
@@ -468,26 +478,11 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
         public async Task<QueryResult<ProjectMemberCollection, ProjectMember, ApiModel.ProjectMemberCollection, ApiModel.ProjectMember>> GetMembersPaged(string cursor)
         {
-            var qp = StandardQueryParams.Get(
-                callbacks: new Action<StandardQueryParams>[] {
-                    (sqp) => sqp.Cursor(cursor)
-                }
+            var apiRelativeUrlPath = ApiPaths.OrganizationsProjectsMembersFormat
+                .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this);
+            return await GetItemsPaged<ProjectMemberCollection, ProjectMember, ApiModel.ProjectMemberCollection, ApiModel.ProjectMember>(
+                apiRelativeUrlPath, null, cursor
             );
-
-            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
-                apiRelativeUrlPath: ApiPaths.OrganizationsProjectsMembersFormat
-                    .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
-                app: App,
-                queryParams: qp
-            );
-
-            var apiModel = ApiModel.QueryResult<ApiModel.ProjectMemberCollection>.FromJson(responseBody);
-
-            return Util.DefineN1AppInScope(App, () =>
-            {
-                return QueryResult<ProjectMemberCollection, ProjectMember, ApiModel.ProjectMemberCollection, ApiModel.ProjectMember>
-                    .FromApiModel(apiModel);
-            });
         }
 
         /// <summary>
@@ -501,7 +496,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             qp["homePath"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetHomePath());
             qp["projectPath"] = Common.PathHelper.GetOrganizationLink(Id, Common.PathHelper.GetProjectPath(Id));
 
-            string body = Util.SerializeObject(members);
+            string body = Util.JsonSerializeObject(members);
 
             string responseBody = await Http.ExecutePostRequestWithTextResponse(
                     apiRelativeUrlPath: ApiPaths.OrganizationsProjectsMembersFormat

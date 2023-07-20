@@ -46,7 +46,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
             FromJsonDelegate fromJsonFactoryOverride = null)
             where TQueryResult : QueryResult<T>
         {
-            var r = Common.Util.DeserializeObject<TQueryResult>(json);
+            var r = Common.Util.JsonDeserializeObject<TQueryResult>(json);
             var fromJsonFactory = fromJsonFactoryOverride ?? _fromJsonFactory;
             r.Results = fromJsonFactory(json) as T;
             return r;
@@ -61,7 +61,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         where TEntity : Common.ApiModel.Entity<TEntity>, new()
     {
 #pragma warning disable CA1000  // Do not declare static members on generic types
-        public static TCollection FromJson(string json) => Common.Util.DeserializeObject<TCollection>(json);
+        public static TCollection FromJson(string json) => Common.Util.JsonDeserializeObject<TCollection>(json);
 #pragma warning restore CA1000  // Do not declare static members on generic types
     }
 }

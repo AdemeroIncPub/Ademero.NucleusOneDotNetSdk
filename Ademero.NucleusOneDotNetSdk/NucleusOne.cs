@@ -1,6 +1,9 @@
-﻿using Ademero.NucleusOneDotNetSdk.Model;
+﻿using Ademero.NucleusOneDotNetSdk.Common.Strings;
+using Ademero.NucleusOneDotNetSdk.Model;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
@@ -118,6 +121,67 @@ namespace Ademero.NucleusOneDotNetSdk
             [DebuggerStepThrough]
             protected set => _app = value;
         }
+
+        // TODO: This would be better-handled by explicitly specifying generic type arguments
+        protected static async Task<TModel[]> GetAllEntitiesByPages<TModel, TModelCollection>(
+            Func<string, Task<dynamic>> getNextPageOfQueryResultHandler
+        )
+            where TModelCollection : IEnumerable<TModel>
+        {
+            var allEntityCollectionResults = new List<TModelCollection>();
+            string cursor = null;
+
+            do
+            {
+                var resultsPaged = await getNextPageOfQueryResultHandler(cursor);
+                var results = resultsPaged.Results;
+
+                if (((Array)results.Items).Length == 0)
+                    break;
+
+                allEntityCollectionResults.Add(results);
+                cursor = resultsPaged.Cursor;
+            } while (true);
+
+            return allEntityCollectionResults
+                .SelectMany(x => (IEnumerable<TModel>)((dynamic)x).Items)
+                .ToArray();
+        }
+
+        protected async Task<QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel>>
+            GetItemsPaged<TModelCollection, TModel, TApiModelCollection, TApiModel>(
+            string apiRelativeUrlPath,
+            Action<Dictionary<string, dynamic>> qpCallback,
+            string cursor = null
+        )
+            where TApiModelCollection : class, new()
+            where TApiModel : class, new()
+            where TModelCollection : Common.Model.EntityCollection<TModel, TApiModelCollection>
+            where TModel : Common.Model.Entity<TApiModel>
+        {
+            var qp = StandardQueryParams.Get(
+                callbacks: new Action<StandardQueryParams>[] {
+                    (sqp) => sqp.Cursor(cursor)
+                }
+            );
+
+            if (qpCallback != null)
+                qpCallback(qp);
+
+            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                apiRelativeUrlPath: apiRelativeUrlPath,
+                app: App,
+                queryParams: qp
+            );
+
+            var apiModel = ApiModel.QueryResult<TApiModelCollection>.FromJson(responseBody);
+
+            return Common.Util.DefineN1AppInScope(App, () =>
+            {
+                return QueryResult<TModelCollection, TModel, TApiModelCollection, TApiModel>
+                    .FromApiModel(apiModel);
+            });
+        }
     }
 
     /// <summary>
@@ -163,6 +227,30 @@ namespace Ademero.NucleusOneDotNetSdk
                 app: this,
                 id: organizationId
             );
+        }
+
+        /// <summary>
+        /// Gets an organization by ID.
+        /// </summary>
+        public async Task<OrganizationForClient> GetOrganization(string id)
+        {
+            var responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsOrganizationFormat
+                        .ReplaceOrgIdPlaceholder(id),
+                    app: this
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.OrganizationForClient.FromJson(responseBody);
+
+            // As of writing this, there is a bug with the N1 API where, if the ID of a non-existent
+            // organization is provided, it will return a random organization.
+            if ((apiModel == null) || (apiModel.Id != id))
+                return null;
+
+            return Common.Util.DefineN1AppInScope(this, () => {
+                return OrganizationForClient.FromApiModel(apiModel);
+            });
         }
 
         /// <summary>

@@ -65,7 +65,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         {
             var qp = StandardQueryParams.Get();
 
-            await Common.Util.DefineN1AppInScope(App, async () =>
+            await Common.Util.DefineN1AppInScopeAsync(App, async () =>
             {
                 await Common.Model.ListItems.AddListItems(
                   ApiPaths.OrganizationsProjectsFieldsFieldListItemsFormat
