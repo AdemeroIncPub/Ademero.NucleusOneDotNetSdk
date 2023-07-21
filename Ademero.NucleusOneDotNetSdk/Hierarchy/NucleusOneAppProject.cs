@@ -227,6 +227,27 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         }
 
         /// <summary>
+        /// Deletes a document folder in this project.
+        /// </summary>
+        /// <param name="documentFolderId">The ID of the document folder to delete.</param>
+        public async Task DeleteDocumentFolder(string documentFolderId)
+        {
+            string body = Util.JsonSerializeObject(
+                new
+                {
+                    IDs = new string[] { documentFolderId }
+                });
+
+            await Http.ExecuteDeleteRequest(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentFoldersFormat
+                        .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                    app: App,
+                    body: body
+                )
+                .ConfigureAwait(true);
+        }
+
+        /// <summary>
         /// Uploads a new document into this project.
         /// </summary>
         /// <param name="userEmail">The email address of the user by whom the document will be uploaded.</param>
@@ -314,6 +335,27 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             {
                 return Model.Field.FromApiModel(apiModel);
             });
+        }
+
+        /// <summary>
+        /// Deletes a field in this project.
+        /// </summary>
+        /// <param name="fieldId">The ID of the field to delete.</param>
+        public async Task DeleteField(string fieldId)
+        {
+            string body = Util.JsonSerializeObject(
+                new
+                {
+                    IDs = new string[] { fieldId }
+                });
+
+            await Http.ExecuteDeleteRequest(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFormat
+                        .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                    app: App,
+                    body: body
+                )
+                .ConfigureAwait(true);
         }
 
         /// <summary>
@@ -418,44 +460,83 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <summary>
         /// Searches for documents in this project.
         /// </summary>
-        /// <param name="fields"></param>
         /// <returns></returns>
+        public async Task<SearchResultCollection> SearchAllDocuments(Dictionary<string, string> fieldIdsAndValues)
+        {
+            Func<string, Task<dynamic>> getNextPageHandler = async (string cursor) =>
+                await SearchDocumentsPaged(fieldIdsAndValues, cursor);
+            SearchResult[] allResults = await GetAllEntitiesByPages<SearchResult, SearchResultCollection>(
+                getNextPageHandler
+            );
+            return new SearchResultCollection(allResults, App);
+        }
+
+        /// <summary>
+        /// Searches for documents in this project, by page.
+        /// </summary>
+        /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
         public async Task<QueryResult<SearchResultCollection, SearchResult, ApiModel.SearchResultCollection, ApiModel.SearchResult>>
-            SearchDocuments(Dictionary<string, string> fieldIdsAndValues)
+            SearchDocumentsPaged(Dictionary<string, string> fieldIdsAndValues, string cursor)
         {
             // Convert each input search field into the expected JSON object
-            var fieldIdsAndValuesJsonObjects = fieldIdsAndValues.Select(x =>
-            {
-                return new
+            List<dynamic> fieldIdsAndValuesJsonObjects = fieldIdsAndValues.Select(x =>
                 {
-                    FieldID = "IxF_Text[" + x.Key + "].keyword",
+                    return new
+                    {
+                        FieldID = "IxF_Text[" + x.Key + "]",
+                        FieldType = "FieldType_Text",
+                        FieldValue = x.Value,
+                        Operator = "equals"
+                    };
+                })
+                .ToList<dynamic>();
+
+            fieldIdsAndValuesJsonObjects.Add(
+                new
+                {
+                    FieldID = "Meta_kw256[ProjectID]",
                     FieldType = "FieldType_Text",
-                    FieldValue = x.Value,
+                    FieldValue = Id,
                     Operator = "equals"
-                };
-            });
+                });
 
-            var qp = StandardQueryParams.Get();
+            Action<Dictionary<string, dynamic>> qpCallback = (qp) =>
+            {
+                // Only search documents
+                qp["contentType"] = "Document";
+                qp["metaFieldFilters_json"] = Common.Util.JsonSerializeObject(fieldIdsAndValuesJsonObjects);
+            };
 
-            // Only search documents
-            qp["contentType"] = "Document";
-            qp["metaFieldFilters_json"] = Common.Util.JsonSerializeObject(fieldIdsAndValuesJsonObjects);
+            var apiRelativeUrlPath = ApiPaths.OrganizationSearchResults
+                .ReplaceOrgIdPlaceholder(Organization.Id);
+            return await GetItemsPaged<SearchResultCollection, SearchResult, ApiModel.SearchResultCollection, ApiModel.SearchResult>(
+                apiRelativeUrlPath, qpCallback, cursor
+            );
+        }
 
-            string responseBody = await Http.ExecuteGetRequestWithTextResponse(
-                    apiRelativeUrlPath: ApiPaths.OrganizationSearchResults
-                        .ReplaceOrgIdPlaceholder(Organization.Id),
+        /// <summary>
+        /// Sends a document in this project to the Recycle Bin.
+        /// </summary>
+        /// <param name="documentId">The document's ID.</param>
+        /// <returns></returns>
+        public async Task SendDocumentToRecycleBin(string documentId)
+        {
+            string body = Util.JsonSerializeObject(
+                new
+                {
+                    IDs = new string[] { documentId }
+                });
+
+            string responseBody = await Http.ExecutePostRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentActionsSendToRecycleBinFormat
+                        .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
                     app: App,
-                    queryParams: qp
+                    body: body
                 )
                 .ConfigureAwait(true);
 
-            var apiModel = ApiModel.QueryResult<ApiModel.SearchResultCollection>.FromJson(responseBody);
-
-            return Util.DefineN1AppInScope(App, () =>
-            {
-                return QueryResult<SearchResultCollection, SearchResult, ApiModel.SearchResultCollection, ApiModel.SearchResult>
-                    .FromApiModel(apiModel);
-            });
+            // This technically returns a document object, but we're not returning it, for now.
+            // If needed, this can be changed in the future.
         }
 
         /// <summary>

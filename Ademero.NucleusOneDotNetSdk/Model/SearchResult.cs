@@ -54,7 +54,7 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 DocumentSignatureSessionId = apiModel.DocumentSignatureSessionId,
                 DocumentSignatureSessionIsActive = apiModel.DocumentSignatureSessionIsActive ?? false,
                 Description = apiModel.Description,
-                PreviewMetadata = apiModel.PreviewMetadata
+                PreviewMetadata = apiModel.PreviewMetadata?
                     .Select(x => x.ToDictionary(y => y.Key, y => y.Value))
                     .ToArray(),
                 PrimaryDocument = TaskDocument.FromApiModel(apiModel.PrimaryDocument),

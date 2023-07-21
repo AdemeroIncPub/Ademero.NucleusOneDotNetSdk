@@ -158,8 +158,24 @@ namespace Ademero.NucleusOneDotNetSdk
                         SetRequestHeadersCommon(clientReq);
                     }
 
-                    resp = await httpClient.SendAsync(clientReq)
-                        .ConfigureAwait(true);
+                    resp = null;
+                    var reqStartTime = DateTime.Now;
+                    try
+                    {
+                        resp = await httpClient.SendAsync(clientReq)
+                            .ConfigureAwait(true);
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        var reqDuration = DateTime.Now.Subtract(reqStartTime);
+
+                        if (reqDuration >= httpClient.Timeout)
+                        {
+                            var exMsg = $"The {clientReq.Method} request to the following URL timed out after {httpClient.Timeout.TotalSeconds} seconds.\n{clientReq.RequestUri}";
+                            throw new TimeoutException(exMsg, ex);
+                        }
+                        throw;
+                    }
                 }
                 finally
                 {
@@ -377,8 +393,8 @@ namespace Ademero.NucleusOneDotNetSdk
         //    "/organizations/<organizationId>/projects/<projectId>/counts/recycleBinDocuments";
         //public const string organizationsProjectsDocumentActionsRestoreFromRecycleBinFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/documentActions/restoreFromRecycleBin";
-        //public const string organizationsProjectsDocumentActionsSendToRecycleBinFormat =
-        //    "/organizations/<organizationId>/projects/<projectId>/documentActions/sendToRecycleBin";
+        public const string OrganizationsProjectsDocumentActionsSendToRecycleBinFormat =
+            "/organizations/<organizationId>/projects/<projectId>/documentActions/sendToRecycleBin";
         //public const string organizationsProjectsDocumentContentPackagesFormat =
         //    "/organizations/<organizationId>/projects/<projectId>/documentContentPackages/<documentId>";
         public const string OrganizationsProjectsDocumentFoldersFormat =
