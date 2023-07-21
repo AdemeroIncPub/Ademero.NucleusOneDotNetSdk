@@ -317,6 +317,27 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         }
 
         /// <summary>
+        /// Deletes a field in this project.
+        /// </summary>
+        /// <param name="fieldId">The ID of the field to delete.</param>
+        public async Task DeleteField(string fieldId)
+        {
+            string body = Util.JsonSerializeObject(
+                new
+                {
+                    IDs = new string[] { fieldId }
+                });
+
+            await Http.ExecuteDeleteRequest(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsFieldsFormat
+                        .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                    app: App,
+                    body: body
+                )
+                .ConfigureAwait(true);
+        }
+
+        /// <summary>
         /// Gets this project's fields.
         /// </summary>
         /// <returns></returns>
@@ -428,7 +449,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             {
                 return new
                 {
-                    FieldID = "IxF_Text[" + x.Key + "].keyword",
+                    FieldID = "IxF_Text[" + x.Key + "]", // May need ".keyword" suffix
                     FieldType = "FieldType_Text",
                     FieldValue = x.Value,
                     Operator = "equals"

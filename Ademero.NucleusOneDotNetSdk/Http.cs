@@ -158,8 +158,25 @@ namespace Ademero.NucleusOneDotNetSdk
                         SetRequestHeadersCommon(clientReq);
                     }
 
-                    resp = await httpClient.SendAsync(clientReq)
-                        .ConfigureAwait(true);
+                    resp = null;
+                    var reqStartTime = DateTime.Now;
+                    try
+                    {
+                        resp = await httpClient.SendAsync(clientReq)
+                            .ConfigureAwait(true);
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        var reqDuration = DateTime.Now.Subtract(reqStartTime);
+                        System.Diagnostics.Debugger.Break();
+
+                        if (reqDuration >= httpClient.Timeout)
+                        {
+                            var exMsg = $"The {clientReq.Method} request to the following URL timed out after {httpClient.Timeout.TotalSeconds} seconds.\n{clientReq.RequestUri}";
+                            throw new TimeoutException(exMsg, ex);
+                        }
+                        throw;
+                    }
                 }
                 finally
                 {
