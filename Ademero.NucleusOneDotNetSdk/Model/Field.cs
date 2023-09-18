@@ -17,6 +17,7 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             return new Field(app)
             {
                 Id = apiModel.Id,
+                Rank = apiModel.Rank,
                 CreatedOn = apiModel.CreatedOn,
                 ParentFieldId = apiModel.ParentFieldId,
                 Name = apiModel.Name,
@@ -27,6 +28,7 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 LabelOrNameLower = apiModel.LabelOrNameLower,
                 Type = apiModel.Type,
                 DisplaySelectionList = apiModel.DisplaySelectionList,
+                SelectionListIsDependent = apiModel.SelectionListIsDependent,
                 AllowMultipleLines = apiModel.AllowMultipleLines,
                 Rows = apiModel.Rows,
                 AllowMultipleValues = apiModel.AllowMultipleValues,
@@ -44,6 +46,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         #region Properties
 
         public string Id { get; set; }
+
+        public double Rank { get; set; }
 
         public string CreatedOn { get; set; }
 
@@ -66,6 +70,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         public string Type { get; set; }
 
         public bool DisplaySelectionList { get; set; }
+
+        public bool SelectionListIsDependent { get; set; }
 
         public bool AllowMultipleLines { get; set; }
 

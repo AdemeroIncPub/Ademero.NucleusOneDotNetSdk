@@ -63,6 +63,9 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         [JsonProperty("DisplaySelectionList")]
         public bool DisplaySelectionList { get; set; }
 
+        [JsonProperty("SelectionListIsDependent")]
+        public bool SelectionListIsDependent { get; set; }
+
         [JsonProperty("AllowMultipleLines")]
         public bool AllowMultipleLines { get; set; }
 

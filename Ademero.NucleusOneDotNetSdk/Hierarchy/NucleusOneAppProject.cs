@@ -256,9 +256,11 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <param name="file">The file to upload.</param>
         /// <param name="documentFolderId">The ID of the folder to place the document in.</param>
         /// <param name="fieldIDsAndValues">Document field IDs and values.</param>
+        /// <param name="skipOcr">Whether or not the file should be skipped.</param>
         /// <returns>A task representing the asynchronous upload operation.</returns>
         public async Task UploadDocument(string userEmail, string fileName, string contentType, byte[] file,
-            string documentFolderId = null, Dictionary<string, List<string>> fieldIDsAndValues = null)
+            string documentFolderId = null, Dictionary<string, List<string>> fieldIDsAndValues = null,
+            bool skipOcr = false)
         {
             var docUploadReservation = await GetDocumentUploadReservation();
             var fileSize = file.Length;
@@ -273,6 +275,9 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             var qp = StandardQueryParams.Get();
             qp["uniqueId"] = docUploadReservation.UniqueId;
             qp["captureOriginal"] = false;
+
+            if (skipOcr)
+                qp["skipOCR"] = false;
 
             await Http.ExecutePutRequest(
                 apiRelativeUrlPath: ApiPaths.OrganizationsProjectsDocumentUploadsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),

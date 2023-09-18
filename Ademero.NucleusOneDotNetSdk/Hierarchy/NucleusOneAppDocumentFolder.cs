@@ -44,15 +44,11 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <summary>
         /// Uploads a new document into this document folder.
         /// </summary>
-        /// <param name="userEmail">The email address of the user by whom the document will be uploaded.</param>
-        /// <param name="fileName">The file name to use when uploading the file.</param>
-        /// <param name="contentType">The MIME type of the file.</param>
-        /// <param name="file">The file to upload.</param>
-        /// <returns>A task representing the asynchronous upload operation.</returns>
+        /// <inheritdoc cref="NucleusOneAppProject.UploadDocument" />
         public async Task UploadDocument(string userEmail, string fileName, string contentType, byte[] file,
-            Dictionary<string, List<string>> fieldIDsAndValues = null)
+            Dictionary<string, List<string>> fieldIDsAndValues = null, bool skipOcr = false)
         {
-            await Project.UploadDocument(userEmail, fileName, contentType, file, Id, fieldIDsAndValues);
+            await Project.UploadDocument(userEmail, fileName, contentType, file, Id, fieldIDsAndValues, skipOcr);
         }
     }
 }
