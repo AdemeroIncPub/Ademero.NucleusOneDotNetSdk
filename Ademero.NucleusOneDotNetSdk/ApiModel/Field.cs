@@ -10,6 +10,17 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
     [JsonObject(MemberSerialization.OptIn, ItemNullValueHandling = NullValueHandling.Ignore)]
     public class Field : Common.ApiModel.Entity<Field>
     {
+        public Field() : base()
+        {
+            _documentTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        #region Fields
+
+        private HashSet<string> _documentTags;
+
+        #endregion
+
         #region Properties
 
         [JsonProperty("ID")]
@@ -98,6 +109,13 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
 
         [JsonProperty("TextMatchType")]
         public string TextMatchType { get; set; }
+
+        [JsonProperty("DocumentTags")]
+        public HashSet<string> DocumentTags
+        {
+            get => _documentTags;
+            set => _documentTags = value ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
 
         #endregion
     }

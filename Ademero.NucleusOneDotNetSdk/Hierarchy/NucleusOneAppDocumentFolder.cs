@@ -46,9 +46,9 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// </summary>
         /// <inheritdoc cref="NucleusOneAppProject.UploadDocument" />
         public async Task UploadDocument(string userEmail, string fileName, string contentType, byte[] file,
-            Dictionary<string, List<string>> fieldIDsAndValues = null, bool skipOcr = false)
+            Dictionary<string, List<string>> fieldIDsAndValues = null, HashSet<string> tags = null, bool skipOcr = false)
         {
-            await Project.UploadDocument(userEmail, fileName, contentType, file, Id, fieldIDsAndValues, skipOcr);
+            await Project.UploadDocument(userEmail, fileName, contentType, file, Id, fieldIDsAndValues, tags, skipOcr);
         }
     }
 }

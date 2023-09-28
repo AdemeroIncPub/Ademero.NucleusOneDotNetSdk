@@ -10,7 +10,16 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     [Serializable]
     public class Field : Common.Model.Entity<ApiModel.Field>
     {
-        private Field(NucleusOneApp app) : base(app) { }
+        private Field(NucleusOneApp app) : base(app)
+        {
+            _documentTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        #region Fields
+
+        private HashSet<string> _documentTags;
+
+        #endregion
 
         public static Field FromApiModel(ApiModel.Field apiModel, NucleusOneApp app = null)
         {
@@ -39,7 +48,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 Required = apiModel.Required,
                 Sensitive = apiModel.Sensitive,
                 UseCreationDate = apiModel.UseCreationDate,
-                TextMatchType = apiModel.TextMatchType
+                TextMatchType = apiModel.TextMatchType,
+                DocumentTags = apiModel.DocumentTags
             };
         }
 
@@ -95,6 +105,12 @@ namespace Ademero.NucleusOneDotNetSdk.Model
 
         public string TextMatchType { get; set; }
 
+        public HashSet<string> DocumentTags
+        {
+            get => _documentTags;
+            set => _documentTags = value ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
         #endregion
 
         public override ApiModel.Field ToApiModel()
@@ -123,7 +139,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 Required = Required,
                 Sensitive = Sensitive,
                 UseCreationDate = UseCreationDate,
-                TextMatchType = TextMatchType
+                TextMatchType = TextMatchType,
+                DocumentTags = DocumentTags
             };
         }
     }

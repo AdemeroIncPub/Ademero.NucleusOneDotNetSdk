@@ -10,7 +10,16 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
     [JsonObject(MemberSerialization.OptIn, ItemNullValueHandling = NullValueHandling.Ignore)]
     public class DocumentUpload : Common.ApiModel.Entity<DocumentUpload>
     {
-        public DocumentUpload() { }
+        public DocumentUpload()
+        {
+            _tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        #region Fields
+
+        private HashSet<string> _tags;
+
+        #endregion
 
         #region Properties
 
@@ -46,6 +55,13 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
 
         [JsonProperty("ContentType")]
         public string ContentType { get; set; }
+
+        [JsonProperty("Tags")]
+        public HashSet<string> Tags
+        {
+            get => _tags;
+            set => _tags = value ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
 
         #endregion
     }

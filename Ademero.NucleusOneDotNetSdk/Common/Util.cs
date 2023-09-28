@@ -110,5 +110,15 @@ namespace Ademero.NucleusOneDotNetSdk.Common
             if (value != null)
                 dict[key] = value;
         }
+
+        /// <summary>
+        /// Converts a <see cref="HashSet&lt;string&gt;"/> to be case insensitive.  Duplicate entries will be discarded.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns>The input, converted into a case-insensitive <see cref="HashSet&lt;string&gt;"/>.</returns>
+        internal static HashSet<string> MakeHashSetCaseInsensitive(HashSet<string> value)
+        {
+            return new HashSet<string>(value, new Strings.CaseInsensitiveStringComparer());
+        }
     }
 }

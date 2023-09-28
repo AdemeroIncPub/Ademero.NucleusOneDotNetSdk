@@ -153,4 +153,17 @@ namespace Ademero.NucleusOneDotNetSdk.Common.Strings
             return System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(text));
         }
     }
+
+    public class CaseInsensitiveStringComparer : System.Collections.Generic.IEqualityComparer<string>
+    {
+        public bool Equals(string x, string y)
+        {
+            return x.Equals(y, System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        public int GetHashCode(string obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
 }

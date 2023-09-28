@@ -8,7 +8,16 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     [Serializable]
     public class DocumentUpload : Common.Model.Entity<ApiModel.DocumentUpload>
     {
-        private DocumentUpload(NucleusOneApp app) : base(app) { }
+        private DocumentUpload(NucleusOneApp app) : base(app)
+        {
+            _tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        #region Fields
+
+        private HashSet<string> _tags;
+
+        #endregion
 
         public static DocumentUpload FromApiModel(ApiModel.DocumentUpload apiModel, NucleusOneApp app = null)
         {
@@ -24,7 +33,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 OriginalFileSize = apiModel.OriginalFileSize,
                 FieldIDsAndValues = apiModel.FieldIDsAndValues,
                 DocumentFolderID = apiModel.DocumentFolderID,
-                ContentType = apiModel.ContentType
+                ContentType = apiModel.ContentType,
+                Tags = apiModel.Tags
             };
         }
 
@@ -52,6 +62,12 @@ namespace Ademero.NucleusOneDotNetSdk.Model
 
         public string ContentType { get; set; }
 
+        public HashSet<string> Tags
+        {
+            get => _tags;
+            set => _tags = value ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
         #endregion
 
         public override ApiModel.DocumentUpload ToApiModel()
@@ -67,7 +83,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 OriginalFilepath = this.OriginalFilepath,
                 OriginalFileSize = this.OriginalFileSize,
                 FieldIDsAndValues = this.FieldIDsAndValues,
-                DocumentFolderID = this.DocumentFolderID
+                DocumentFolderID = this.DocumentFolderID,
+                Tags = this.Tags
             };
         }
     }
