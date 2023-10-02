@@ -278,7 +278,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             qp["captureOriginal"] = false;
 
             if (skipOcr)
-                qp["skipOCR"] = false;
+                qp["skipOCR"] = true;
 
             if (tags?.Count > 0)
                 docUploadReservation.Tags = Util.MakeHashSetCaseInsensitive(tags);
