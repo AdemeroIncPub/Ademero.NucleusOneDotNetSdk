@@ -173,7 +173,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         }
         */
 
-        public async Task<Model.OrganizationProject> CreateProject(string projectName, ProjectAccessType accessType,
+        public async Task<Model.OrganizationProject> CreateProject(string projectName,
             string templateId = null, bool sourceContentCopy = false)
         {
             var qp = StandardQueryParams.Get();
@@ -184,9 +184,6 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
                 new[] {
                     new {
                         Name = projectName,
-                        AccessType = (accessType== ProjectAccessType.Restrictive)
-                            ? "MembersOnlyAssignments_MemberContentByAssignment"
-                            : "GlobalAssignments_MemberContentByDefault",
                         SourceID = templateId,
                         SourceContentCopy = sourceContentCopy
                     }

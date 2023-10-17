@@ -40,8 +40,8 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         [JsonProperty("ProjectIsDisabled")]
         public bool ProjectIsDisabled { get; set; }
 
-        [JsonProperty("ProjectAccessType")]
-        public string ProjectAccessType { get; set; }
+        [JsonProperty("ProjectAccess")]
+        public ProjectAccess ProjectAccess { get; set; }
 
         [JsonProperty("UserID")]
         public string UserId { get; set; }

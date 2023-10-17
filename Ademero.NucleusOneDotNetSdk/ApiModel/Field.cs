@@ -18,6 +18,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         #region Fields
 
         private HashSet<string> _documentTags;
+        private List<string> _childFieldIds;
 
         #endregion
 
@@ -35,17 +36,27 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         [JsonProperty("ProjectName")]
         public string ProjectName { get; set; }
 
-        [JsonProperty("ProjectAccessType")]
-        public string ProjectAccessType { get; set; }
+        [JsonProperty("ProjectAccess")]
+        public ProjectAccess ProjectAccess { get; set; }
 
         [JsonProperty("Rank")]
         public double Rank { get; set; }
+
+        [JsonProperty("AllowDocumentField")]
+        public bool AllowDocumentField { get; set; }
 
         [JsonProperty("CreatedOn")]
         public string CreatedOn { get; set; }
 
         [JsonProperty("ParentFieldID")]
         public string ParentFieldId { get; set; }
+
+        [JsonProperty("ChildFieldIDs")]
+        public List<string> ChildFieldIds
+        {
+            get => _childFieldIds;
+            set => _childFieldIds = value ?? new List<string>();
+        }
 
         [JsonProperty("Name")]
         public string Name { get; set; }

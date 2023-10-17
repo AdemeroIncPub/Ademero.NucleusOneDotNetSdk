@@ -21,6 +21,15 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         [JsonProperty("OrganizationID")]
         public string OrganizationId { get; set; }
 
+        [JsonProperty("SourceID")]
+        public string SourceId { get; set; }
+
+        [JsonProperty("SourceContentCopy")]
+        public bool? SourceContentCopy { get; set; }
+
+        [JsonProperty("Access")]
+        public ProjectAccess Access { get; set; }
+
         [JsonProperty("AccessType")]
         public string AccessType { get; set; }
 

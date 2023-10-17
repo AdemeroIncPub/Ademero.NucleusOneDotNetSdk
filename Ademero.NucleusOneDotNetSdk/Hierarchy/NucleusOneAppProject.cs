@@ -613,10 +613,10 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         }
     }
 
-    public enum ProjectAccessType
+    public enum AssignmentType
     {
-        Restrictive,
-        Permissive
+        World,
+        ProjectMember
     }
 
     public enum FieldType

@@ -24,11 +24,12 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 OrganizationId = apiModel.OrganizationId,
                 ProjectId = apiModel.ProjectId,
                 ProjectName = apiModel.ProjectName,
-                ProjectAccessType = apiModel.ProjectAccessType,
+                ProjectAccess = ProjectAccess.FromApiModel(apiModel.ProjectAccess),
                 CreatedOn = apiModel.CreatedOn,
                 CreatedByUserEmail = apiModel.CreatedByUserEmail,
                 CreatedByUserName = apiModel.CreatedByUserName,
                 CreatedByUserId = apiModel.CreatedByUserId,
+                CreatedByWorkflow = apiModel.CreatedByWorkflow,
                 ModifiedOn = apiModel.ModifiedOn,
                 ModifiedByUserEmail = apiModel.ModifiedByUserEmail,
                 ModifiedByUserName = apiModel.ModifiedByUserName,
@@ -51,11 +52,12 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         public string OrganizationId { get; set; }
         public string ProjectId { get; set; }
         public string ProjectName { get; set; }
-        public string ProjectAccessType { get; set; }
+        public ProjectAccess ProjectAccess { get; set; }
         public string CreatedOn { get; set; }
         public string CreatedByUserEmail { get; set; }
         public string CreatedByUserName { get; set; }
         public string CreatedByUserId { get; set; }
+        public bool CreatedByWorkflow { get; set; }
         public string ModifiedOn { get; set; }
         public string ModifiedByUserEmail { get; set; }
         public string ModifiedByUserName { get; set; }
@@ -80,11 +82,12 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 OrganizationId = OrganizationId,
                 ProjectId = ProjectId,
                 ProjectName = ProjectName,
-                ProjectAccessType = ProjectAccessType,
+                ProjectAccess = ProjectAccess.ToApiModel(),
                 CreatedOn = CreatedOn,
                 CreatedByUserEmail = CreatedByUserEmail,
                 CreatedByUserName = CreatedByUserName,
                 CreatedByUserId = CreatedByUserId,
+                CreatedByWorkflow = CreatedByWorkflow,
                 ModifiedOn = ModifiedOn,
                 ModifiedByUserEmail = ModifiedByUserEmail,
                 ModifiedByUserName = ModifiedByUserName,

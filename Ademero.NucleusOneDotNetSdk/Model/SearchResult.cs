@@ -24,7 +24,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 OrganizationId = apiModel.OrganizationId,
                 ProjectId = apiModel.ProjectId,
                 ProjectName = apiModel.ProjectName,
-                ProjectAccessType = apiModel.ProjectAccessType,
+                ProjectAccess = ProjectAccess.FromApiModel(apiModel.ProjectAccess),
+                ItemAncestorIds = apiModel.ItemAncestorIds,
                 ItemId = apiModel.ItemId,
                 ItemType = apiModel.ItemType,
                 UniqueId = apiModel.UniqueId,
@@ -37,6 +38,9 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 TaskDurationMultiplier = apiModel.TaskDurationMultiplier ?? 0.0,
                 TaskDurationInterval = apiModel.TaskDurationInterval,
                 Tags = apiModel.Tags,
+                AssetItemTags = apiModel.AssetItemTags
+                    .Select(x => AssetItemTag.FromApiModel(x))
+                    .ToArray(),
                 CompletedOn = apiModel.CompletedOn,
                 PurgeDate = apiModel.PurgeDate,
                 PageCount = apiModel.PageCount ?? 0,
@@ -67,107 +71,120 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 ProcessName = apiModel.ProcessName,
                 ProcessElementName = apiModel.ProcessElementName,
                 Result = apiModel.Result,
-                Score = apiModel.Score ?? 0.0
+                AssetName = apiModel.AssetName,
+                AssetId = apiModel.AssetId,
+                Score = apiModel.Score ?? 0.0,
+                Archived = apiModel.Archived ?? false
             };
         }
 
         #region Properties
 
         public string ContentType { get; set; }
-
+        
         public string Id { get; set; }
-
+        
         public string[] AncestorIds { get; set; }
-
+        
         public string OrganizationId { get; set; }
-
+        
         public string ProjectId { get; set; }
-
+        
         public string ProjectName { get; set; }
-
-        public string ProjectAccessType { get; set; }
-
+        
+        public ProjectAccess ProjectAccess { get; set; }
+        
+        public string[] ItemAncestorIds { get; set; }
+        
         public string ItemId { get; set; }
-
+        
         public string ItemType { get; set; }
-
+        
         public string UniqueId { get; set; }
-
+        
         public string Name { get; set; }
-
+        
         public string CreatedOn { get; set; }
-
+        
         public string DueOn { get; set; }
-
+        
         public int Priority { get; set; }
-
+        
         public string TaskMilestoneName { get; set; }
-
+        
         public string TaskStateName { get; set; }
-
+        
         public double TaskDurationMultiplier { get; set; }
-
+        
         public string TaskDurationInterval { get; set; }
-
+        
         public string[] Tags { get; set; }
-
+        
+        public AssetItemTag[] AssetItemTags { get; set; }
+        
         public string CompletedOn { get; set; }
-
+        
         public string PurgeDate { get; set; }
-
+        
         public int PageCount { get; set; }
-
+        
         public int FileSize { get; set; }
-
+        
         public string ThumbnailUrl { get; set; }
-
+        
         public bool IsSigned { get; set; }
-
+        
         public string AssignmentUserEmail { get; set; }
-
+        
         public string[] AssignmentUserEmails { get; set; }
-
+        
         public string AssignmentUserName { get; set; }
-
+        
         public string DocumentId { get; set; }
-
+        
         public string DocumentFolderId { get; set; }
-
+        
         public string DocumentOrigin { get; set; }
-
+        
         public string DocumentFolderPath { get; set; }
-
+        
         public string DocumentFolderHexColor { get; set; }
-
+        
         public string DocumentSignatureSessionId { get; set; }
-
+        
         public bool DocumentSignatureSessionIsActive { get; set; }
-
+        
         public string Description { get; set; }
-
+        
         public Dictionary<string, string>[] PreviewMetadata { get; set; }
-
+        
         public TaskDocument PrimaryDocument { get; set; }
-
+        
         public string UserName { get; set; }
-
+        
         public string UserEmail { get; set; }
-
+        
         public string CreatedByUserEmail { get; set; }
-
+        
         public string CreatedByUserName { get; set; }
-
+        
         public string CompletedByUserEmail { get; set; }
-
+        
         public string CompletedByUserName { get; set; }
-
+        
         public string ProcessName { get; set; }
-
+        
         public string ProcessElementName { get; set; }
-
+        
         public string Result { get; set; }
-
+        
+        public string AssetName { get; set; }
+        
+        public string AssetId { get; set; }
+        
         public double Score { get; set; }
+        
+        public bool Archived { get; set; }
 
         #endregion
 
@@ -181,7 +198,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 OrganizationId = OrganizationId,
                 ProjectId = ProjectId,
                 ProjectName = ProjectName,
-                ProjectAccessType = ProjectAccessType,
+                ProjectAccess = ProjectAccess.ToApiModel(),
+                ItemAncestorIds = ItemAncestorIds,
                 ItemId = ItemId,
                 ItemType = ItemType,
                 UniqueId = UniqueId,
@@ -194,6 +212,9 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 TaskDurationMultiplier = TaskDurationMultiplier,
                 TaskDurationInterval = TaskDurationInterval,
                 Tags = Tags,
+                AssetItemTags = AssetItemTags
+                    .Select(x => x.ToApiModel())
+                    .ToArray(),
                 CompletedOn = CompletedOn,
                 PurgeDate = PurgeDate,
                 PageCount = PageCount,
@@ -222,7 +243,10 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 ProcessName = ProcessName,
                 ProcessElementName = ProcessElementName,
                 Result = Result,
-                Score = Score
+                AssetName = AssetName,
+                AssetId = AssetId,
+                Score = Score,
+                Archived = Archived
             };
         }
     }

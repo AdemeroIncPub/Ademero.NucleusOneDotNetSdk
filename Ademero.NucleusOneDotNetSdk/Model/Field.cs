@@ -12,11 +12,13 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     {
         private Field(NucleusOneApp app) : base(app)
         {
+            _childFieldIds = new List<string>();
             _documentTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
         #region Fields
 
+        private List<string> _childFieldIds;
         private HashSet<string> _documentTags;
 
         #endregion
@@ -26,9 +28,12 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             return new Field(app)
             {
                 Id = apiModel.Id,
+                ProjectAccess = ProjectAccess.FromApiModel(apiModel.ProjectAccess),
                 Rank = apiModel.Rank,
+                AllowDocumentField = apiModel.AllowDocumentField,
                 CreatedOn = apiModel.CreatedOn,
                 ParentFieldId = apiModel.ParentFieldId,
+                ChildFieldIds = apiModel.ChildFieldIds,
                 Name = apiModel.Name,
                 NameLower = apiModel.NameLower,
                 Label = apiModel.Label,
@@ -57,11 +62,21 @@ namespace Ademero.NucleusOneDotNetSdk.Model
 
         public string Id { get; set; }
 
+        public ProjectAccess ProjectAccess { get; set; }
+
         public double Rank { get; set; }
+
+        public bool AllowDocumentField { get; set; }
 
         public string CreatedOn { get; set; }
 
         public string ParentFieldId { get; set; }
+
+        public List<string> ChildFieldIds
+        {
+            get => _childFieldIds;
+            set => _childFieldIds = value ?? new List<string>();
+        }
 
         public string Name { get; set; }
 

@@ -18,6 +18,9 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             {
                 Id = apiModel.Id,
                 OrganizationId = apiModel.OrganizationId,
+                SourceId = apiModel.SourceId,
+                SourceContentCopy = apiModel.SourceContentCopy.HasValue ? apiModel.SourceContentCopy.Value : false,
+                Access = ProjectAccess.FromApiModel(apiModel.Access),
                 AccessType = apiModel.AccessType,
                 CreatedOn = apiModel.CreatedOn,
                 CreatedByUserId = apiModel.CreatedByUserId,
@@ -35,22 +38,18 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         }
 
         #region Properties
-
+        
         public string Id { get; set; }
-
+        
         public string OrganizationId { get; set; }
+        
+        public string SourceId { get; set; }
+        
+        public bool SourceContentCopy { get; set; }
+        
+        public ProjectAccess Access { get; set; }
 
         public string AccessType { get; set; }
-
-        public ProjectAccessType AccessTypeEnum
-        {
-            get
-            {
-                return (AccessType == "MembersOnlyAssignments_MemberContentByAssignment")
-                    ? ProjectAccessType.Restrictive
-                    : ProjectAccessType.Permissive;
-            }
-        }
 
         public string CreatedOn { get; set; }
 
@@ -84,6 +83,9 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             {
                 Id = Id,
                 OrganizationId = OrganizationId,
+                SourceId = SourceId,
+                SourceContentCopy = SourceContentCopy,
+                Access = Access.ToApiModel(),
                 AccessType = AccessType,
                 CreatedOn = CreatedOn,
                 CreatedByUserId = CreatedByUserId,

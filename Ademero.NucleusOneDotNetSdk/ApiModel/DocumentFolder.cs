@@ -35,8 +35,8 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         [JsonProperty("ProjectName")]
         public string ProjectName { get; set; }
 
-        [JsonProperty("ProjectAccessType")]
-        public string ProjectAccessType { get; set; }
+        [JsonProperty("ProjectAccess")]
+        public ProjectAccess ProjectAccess { get; set; }
 
         [JsonProperty("CreatedOn")]
         public string CreatedOn { get; set; }
@@ -49,6 +49,9 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
 
         [JsonProperty("CreatedByUserID")]
         public string CreatedByUserId { get; set; }
+
+        [JsonProperty("CreatedByWorkflow")]
+        public bool CreatedByWorkflow { get; set; }
 
         [JsonProperty("ModifiedOn")]
         public string ModifiedOn { get; set; }

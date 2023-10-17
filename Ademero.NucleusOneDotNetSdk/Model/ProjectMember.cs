@@ -25,7 +25,7 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 ProjectId = apiModel.ProjectId,
                 ProjectName = apiModel.ProjectName,
                 ProjectIsDisabled = apiModel.ProjectIsDisabled,
-                ProjectAccessType = apiModel.ProjectAccessType,
+                ProjectAccess = ProjectAccess.FromApiModel(apiModel.ProjectAccess),
                 UserId = apiModel.UserId,
                 UserName = apiModel.UserName,
                 UserNameLower = apiModel.UserNameLower,
@@ -39,37 +39,37 @@ namespace Ademero.NucleusOneDotNetSdk.Model
         #region Properties
 
         public string Id { get; set; }
-
+        
         public string CreatedOn { get; set; }
-
+        
         public string OrganizationMemberId { get; set; }
-
+        
         public bool OrganizationMemberIsAdmin { get; set; }
-
+        
         public string OrganizationId { get; set; }
-
+        
         public string OrganizationName { get; set; }
-
+        
         public string ProjectId { get; set; }
-
+        
         public string ProjectName { get; set; }
-
+        
         public bool ProjectIsDisabled { get; set; }
-
-        public string ProjectAccessType { get; set; }
-
+        
+        public ProjectAccess ProjectAccess { get; set; }
+        
         public string UserId { get; set; }
-
+        
         public string UserName { get; set; }
-
+        
         public string UserNameLower { get; set; }
-
+        
         public string UserEmail { get; set; }
-
+        
         public bool Disabled { get; set; }
-
+        
         public bool IsReadOnly { get; set; }
-
+        
         public bool IsAdmin { get; set; }
 
         #endregion
@@ -87,7 +87,7 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 ProjectId = ProjectId,
                 ProjectName = ProjectName,
                 ProjectIsDisabled = ProjectIsDisabled,
-                ProjectAccessType = ProjectAccessType,
+                ProjectAccess = ProjectAccess.ToApiModel(),
                 UserId = UserId,
                 UserName = UserName,
                 UserNameLower = UserNameLower,

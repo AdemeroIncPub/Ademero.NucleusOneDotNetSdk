@@ -14,11 +14,11 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
 
         #region Properties
 
-        [JsonProperty("ContentType")]
-        public string ContentType { get; set; }
-
         [JsonProperty("ID")]
         public string Id { get; set; }
+
+        [JsonProperty("ContentType")]
+        public string ContentType { get; set; }
 
         [JsonProperty("AncestorIDs")]
         public string[] AncestorIds { get; set; }
@@ -32,8 +32,11 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         [JsonProperty("ProjectName")]
         public string ProjectName { get; set; }
 
-        [JsonProperty("ProjectAccessType")]
-        public string ProjectAccessType { get; set; }
+        [JsonProperty("ProjectAccess")]
+        public ProjectAccess ProjectAccess { get; set; }
+
+        [JsonProperty("ItemAncestorIDs")]
+        public string[] ItemAncestorIds { get; set; }
 
         [JsonProperty("ItemID")]
         public string ItemId { get; set; }
@@ -70,6 +73,9 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
 
         [JsonProperty("Tags")]
         public string[] Tags { get; set; }
+
+        [JsonProperty("AssetItemTags")]
+        public AssetItemTag[] AssetItemTags { get; set; }
 
         [JsonProperty("CompletedOn")]
         public string CompletedOn { get; set; }
@@ -155,8 +161,17 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         [JsonProperty("Result")]
         public string Result { get; set; }
 
+        [JsonProperty("AssetName")]
+        public string AssetName { get; set; }
+
+        [JsonProperty("AssetID")]
+        public string AssetId { get; set; }
+
         [JsonProperty("Score")]
         public double? Score { get; set; }
+
+        [JsonProperty("Archived")]
+        public bool? Archived { get; set; }
 
         #endregion
     }
