@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
@@ -10,8 +9,13 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     {
         private AssetItemTag(NucleusOneApp app) : base(app) { }
 
-        public static AssetItemTag FromApiModel(ApiModel.AssetItemTag apiModel, NucleusOneApp app = null)
+        public static AssetItemTag FromApiModel(
+            ApiModel.AssetItemTag apiModel,
+            NucleusOneApp app = null
+        )
         {
+            if (apiModel == null)
+                return null;
             return new AssetItemTag(app)
             {
                 AssetId = apiModel.AssetId,
@@ -59,6 +63,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new AssetItemTagCollection(
                 items: apiModel.AssetItemTags?.Select((x) => AssetItemTag.FromApiModel(x, app)).ToArray());
         }

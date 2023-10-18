@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
@@ -10,12 +9,14 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     {
         private ProjectAccess(NucleusOneApp app) : base(app) { }
 
-        public static Model.ProjectAccess FromApiModel(
+        public static ProjectAccess FromApiModel(
             ApiModel.ProjectAccess apiModel,
             NucleusOneApp app = null
         )
         {
-            return new Model.ProjectAccess(app)
+            if (apiModel == null)
+                return null;
+            return new ProjectAccess(app)
             {
                 Assignments = ProjectAccessAssignments.FromApiModel(apiModel.Assignments),
                 MemberAccess = ProjectMemberAccess.FromApiModel(apiModel.MemberAccess)
@@ -53,6 +54,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new ProjectAccessCollection(
                 items: apiModel.ProjectAccesss?.Select((x) => ProjectAccess.FromApiModel(x, app)).ToArray());
         }

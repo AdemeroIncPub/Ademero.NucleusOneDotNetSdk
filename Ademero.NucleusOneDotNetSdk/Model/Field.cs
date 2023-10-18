@@ -1,8 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
 {
@@ -23,8 +21,13 @@ namespace Ademero.NucleusOneDotNetSdk.Model
 
         #endregion
 
-        public static Field FromApiModel(ApiModel.Field apiModel, NucleusOneApp app = null)
+        public static Field FromApiModel(
+            ApiModel.Field apiModel,
+            NucleusOneApp app = null
+        )
         {
+            if (apiModel == null)
+                return null;
             return new Field(app)
             {
                 Id = apiModel.Id,
@@ -173,6 +176,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new FieldCollection(
                 items: apiModel.Fields?.Select((x) => Field.FromApiModel(x, app)).ToArray());
         }

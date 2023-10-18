@@ -1,5 +1,4 @@
-﻿using Ademero.NucleusOneDotNetSdk.Hierarchy;
-using System;
+﻿using System;
 using System.Linq;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
@@ -14,6 +13,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new OrganizationProject(app)
             {
                 Id = apiModel.Id,
@@ -116,6 +117,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new OrganizationProjectCollection(
                 items: apiModel.Projects?.Select((x) => OrganizationProject.FromApiModel(x, app)).ToArray());
         }

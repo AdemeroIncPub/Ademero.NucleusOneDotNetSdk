@@ -9,8 +9,13 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     {
         private FieldListItem(NucleusOneApp app) : base(app) { }
 
-        public static FieldListItem FromApiModel(ApiModel.FieldListItem apiModel, NucleusOneApp app = null)
+        public static FieldListItem FromApiModel(
+            ApiModel.FieldListItem apiModel,
+            NucleusOneApp app = null
+        )
         {
+            if (apiModel == null)
+                return null;
             return new FieldListItem(app)
             {
                 Id = apiModel.Id,
@@ -53,6 +58,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new FieldListItemCollection(
                 items: apiModel.FieldListItems?.Select((x) => FieldListItem.FromApiModel(x, app)).ToArray());
         }

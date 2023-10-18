@@ -19,8 +19,13 @@ namespace Ademero.NucleusOneDotNetSdk.Model
 
         #endregion
 
-        public static DocumentUpload FromApiModel(ApiModel.DocumentUpload apiModel, NucleusOneApp app = null)
+        public static DocumentUpload FromApiModel(
+            ApiModel.DocumentUpload apiModel,
+            NucleusOneApp app = null
+        )
         {
+            if (apiModel == null)
+                return null;
             return new DocumentUpload(app)
             {
                 SignedUrl = apiModel.SignedUrl,
@@ -103,6 +108,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new DocumentUploadCollection(
                 items: apiModel.DocumentUploads?.Select((x) => DocumentUpload.FromApiModel(x, app)).ToArray());
         }

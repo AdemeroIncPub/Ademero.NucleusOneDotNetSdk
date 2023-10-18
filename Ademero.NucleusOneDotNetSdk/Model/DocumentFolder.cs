@@ -10,12 +10,14 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     {
         private DocumentFolder(NucleusOneApp app) : base(app) { }
 
-        public static Model.DocumentFolder FromApiModel(
+        public static DocumentFolder FromApiModel(
             ApiModel.DocumentFolder apiModel,
             NucleusOneApp app = null
         )
         {
-            return new Model.DocumentFolder(app)
+            if (apiModel == null)
+                return null;
+            return new DocumentFolder(app)
             {
                 Id = apiModel.Id,
                 UniqueId = apiModel.UniqueId,
@@ -116,6 +118,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new DocumentFolderCollection(
                 items: apiModel.DocumentFolders?.Select((x) => DocumentFolder.FromApiModel(x, app)).ToArray());
         }

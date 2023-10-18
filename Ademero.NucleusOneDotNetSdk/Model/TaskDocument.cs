@@ -15,6 +15,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new TaskDocument(app)
             {
                 Id = apiModel.Id,
@@ -103,6 +105,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new TaskDocumentCollection(
                 items: apiModel.TaskDocuments?.Select((x) => TaskDocument.FromApiModel(x, app)).ToArray());
         }

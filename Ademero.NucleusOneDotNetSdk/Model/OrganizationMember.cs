@@ -9,12 +9,14 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     {
         private OrganizationMember(NucleusOneApp app) : base(app) { }
 
-        public static Model.OrganizationMember FromApiModel(
+        public static OrganizationMember FromApiModel(
             ApiModel.OrganizationMember apiModel,
             NucleusOneApp app = null
         )
         {
-            return new Model.OrganizationMember(app)
+            if (apiModel == null)
+                return null;
+            return new OrganizationMember(app)
             {
                 Id = apiModel.Id,
                 CreatedOn = apiModel.CreatedOn,
@@ -89,6 +91,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new OrganizationMemberCollection(
                 items: apiModel.OrganizationMembers?.Select((x) => OrganizationMember.FromApiModel(x, app)).ToArray());
         }

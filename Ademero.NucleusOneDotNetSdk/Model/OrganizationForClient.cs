@@ -38,6 +38,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new OrganizationForClient(app)
             {
                 Id = apiModel.Id,
@@ -119,6 +121,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new OrganizationForClientCollection(
                 items: apiModel.Organizations?.Select((x) => OrganizationForClient.FromApiModel(x, app)).ToArray());
         }

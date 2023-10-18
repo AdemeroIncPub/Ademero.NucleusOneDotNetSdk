@@ -9,12 +9,14 @@ namespace Ademero.NucleusOneDotNetSdk.Model
     {
         private ProjectMember(NucleusOneApp app) : base(app) { }
 
-        public static Model.ProjectMember FromApiModel(
+        public static ProjectMember FromApiModel(
             ApiModel.ProjectMember apiModel,
             NucleusOneApp app = null
         )
         {
-            return new Model.ProjectMember(app)
+            if (apiModel == null)
+                return null;
+            return new ProjectMember(app)
             {
                 Id = apiModel.Id,
                 CreatedOn = apiModel.CreatedOn,
@@ -113,6 +115,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new ProjectMemberCollection(
                 items: apiModel.ProjectMembers?.Select((x) => ProjectMember.FromApiModel(x, app)).ToArray());
         }

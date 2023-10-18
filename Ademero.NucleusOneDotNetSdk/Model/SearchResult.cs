@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Ademero.NucleusOneDotNetSdk.Model
 {
@@ -16,6 +15,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new SearchResult(app)
             {
                 Id = apiModel.Id,
@@ -264,6 +265,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
             NucleusOneApp app = null
         )
         {
+            if (apiModel == null)
+                return null;
             return new SearchResultCollection(
                 items: apiModel.SearchResults?.Select((x) => SearchResult.FromApiModel(x, app)).ToArray());
         }
