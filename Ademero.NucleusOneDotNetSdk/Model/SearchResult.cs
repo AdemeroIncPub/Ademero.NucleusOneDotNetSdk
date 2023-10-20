@@ -40,8 +40,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 TaskDurationInterval = apiModel.TaskDurationInterval,
                 Tags = apiModel.Tags,
                 AssetItemTags = apiModel.AssetItemTags
-                    .Select(x => AssetItemTag.FromApiModel(x))
-                    .ToArray(),
+                    ?.Select(x => AssetItemTag.FromApiModel(x))
+                    ?.ToArray(),
                 CompletedOn = apiModel.CompletedOn,
                 PurgeDate = apiModel.PurgeDate,
                 PageCount = apiModel.PageCount ?? 0,
@@ -59,9 +59,9 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 DocumentSignatureSessionId = apiModel.DocumentSignatureSessionId,
                 DocumentSignatureSessionIsActive = apiModel.DocumentSignatureSessionIsActive ?? false,
                 Description = apiModel.Description,
-                PreviewMetadata = apiModel.PreviewMetadata?
-                    .Select(x => x.ToDictionary(y => y.Key, y => y.Value))
-                    .ToArray(),
+                PreviewMetadata = apiModel.PreviewMetadata
+                    ?.Select(x => x.ToDictionary(y => y.Key, y => y.Value))
+                    ?.ToArray(),
                 PrimaryDocument = TaskDocument.FromApiModel(apiModel.PrimaryDocument),
                 UserName = apiModel.UserName,
                 UserEmail = apiModel.UserEmail,
@@ -214,8 +214,8 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 TaskDurationInterval = TaskDurationInterval,
                 Tags = Tags,
                 AssetItemTags = AssetItemTags
-                    .Select(x => x.ToApiModel())
-                    .ToArray(),
+                    ?.Select(x => x.ToApiModel())
+                    ?.ToArray(),
                 CompletedOn = CompletedOn,
                 PurgeDate = PurgeDate,
                 PageCount = PageCount,
@@ -233,7 +233,9 @@ namespace Ademero.NucleusOneDotNetSdk.Model
                 DocumentSignatureSessionId = DocumentSignatureSessionId,
                 DocumentSignatureSessionIsActive = DocumentSignatureSessionIsActive,
                 Description = Description,
-                PreviewMetadata = PreviewMetadata,
+                PreviewMetadata = PreviewMetadata
+                    ?.Select(x => new Dictionary<string, string>(x))
+                    ?.ToArray(),
                 PrimaryDocument = PrimaryDocument?.ToApiModel(),
                 UserName = UserName,
                 UserEmail = UserEmail,
