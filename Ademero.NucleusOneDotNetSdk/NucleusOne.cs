@@ -123,7 +123,7 @@ namespace Ademero.NucleusOneDotNetSdk
         }
 
         // TODO: This would be better-handled by explicitly specifying generic type arguments
-        protected static async Task<TModel[]> GetAllEntitiesByPages<TModel, TModelCollection>(
+        protected internal static async Task<TModel[]> GetAllEntitiesByPages<TModel, TModelCollection>(
             Func<string, Task<dynamic>> getNextPageOfQueryResultHandler
         )
             where TModelCollection : IEnumerable<TModel>
@@ -136,10 +136,15 @@ namespace Ademero.NucleusOneDotNetSdk
                 var resultsPaged = await getNextPageOfQueryResultHandler(cursor);
                 var results = resultsPaged.Results;
 
-                if (((Array)results.Items).Length == 0)
+                allEntityCollectionResults.Add(results);
+
+                int itemCount = ((Array)results.Items).Length;
+                int pageSize = resultsPaged.PageSize;
+
+                // If the result count is less than the cursor's page size then this is the end of the results
+                if ((pageSize == 0) || (itemCount < pageSize))
                     break;
 
-                allEntityCollectionResults.Add(results);
                 cursor = resultsPaged.Cursor;
             } while (true);
 

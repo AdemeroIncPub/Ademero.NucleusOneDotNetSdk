@@ -63,19 +63,31 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <returns>A Task representing the asynchronous operation.</returns>
         public async Task AddListItems(Model.FieldListItemCollection items)
         {
-            var qp = StandardQueryParams.Get();
-
             await Common.Util.DefineN1AppInScopeAsync(App, async () =>
             {
                 await Common.Model.ListItems.AddListItems(
                   ApiPaths.OrganizationsProjectsFieldsFieldListItemsFormat
                     .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(Project)
                     .ReplaceFieldIdPlaceholder(Id),
-                  items,
-                  qp
+                  items
                 );
             });
         }
 
+        /// <summary>
+        /// Gets list item values for the current field, without the Id property populated.
+        /// </summary>
+        /// <returns>The list item values for the current field.</returns>
+        public async Task<Model.FieldListItemCollection> GetAllListItemsNoIds()
+        {
+            return await Common.Util.DefineN1AppInScopeAsync(App, async () =>
+            {
+                return await Common.Model.ListItems.GetAllListItemsNoIds(
+                  ApiPaths.OrganizationsProjectsFieldsFieldListItemsFormat
+                    .ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(Project)
+                    .ReplaceFieldIdPlaceholder(Id)
+                );
+            });
+        }
     }
 }

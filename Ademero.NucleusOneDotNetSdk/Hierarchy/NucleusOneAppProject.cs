@@ -51,6 +51,14 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         }
 
         /// <summary>
+        /// Gets a NucleusOneAppField instance, which can be used to perform field operations for this project.
+        /// </summary>
+        public NucleusOneAppField Field(string fieldId)
+        {
+            return new NucleusOneAppField(this, fieldId);
+        }
+
+        /// <summary>
         /// Gets a Document Upload reservation for this project.
         ///
         /// Call this *only* if you want to handle the upload process of a document manually; otherwise,
@@ -315,7 +323,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
 
             return Util.DefineN1AppInScope(App, () =>
             {
-                return Field.FromApiModel(apiModel);
+                return Model.Field.FromApiModel(apiModel);
             });
         }
 
@@ -462,6 +470,33 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
             return Util.DefineN1AppInScope(App, () =>
             {
                 return ProjectMember.FromApiModel(apiModel.Results.ProjectMembers[0]);
+            });
+        }
+
+        /// <summary>
+        /// Gets all tags in this project.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Model.TagCollection> GetAllTags()
+        {
+            string responseBody = await Http.ExecuteGetRequestWithTextResponse(
+                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsTagsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
+                    app: App
+                )
+                .ConfigureAwait(true);
+
+            var apiModel = ApiModel.TagCollection.FromJsonArray(
+                arrayItemsJson: responseBody,
+                instance: new ApiModel.TagCollection(),
+                entityFromJsonCallback: (x) => ApiModel.Tag.FromJson(x)
+            );
+
+            return Util.DefineN1AppInScope(App, () =>
+            {
+                var tags = Model.TagCollection.FromApiModel(apiModel);
+                if ((tags == null) || (tags.Items.Length == 0))
+                    return null;
+                return tags;
             });
         }
 
