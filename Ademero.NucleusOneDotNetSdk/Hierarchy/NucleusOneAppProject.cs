@@ -476,28 +476,33 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <summary>
         /// Gets all tags in this project.
         /// </summary>
+        /// <param name="includeAssetItems">Whether to include asset items in the results.</param>
         /// <returns></returns>
-        public async Task<Model.TagCollection> GetAllTags()
+        public async Task<Model.TagCollection> GetAllTags(bool? includeAssetItems = null)
         {
-            string responseBody = await Http.ExecuteGetRequestWithTextResponse(
-                    apiRelativeUrlPath: ApiPaths.OrganizationsProjectsTagsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this),
-                    app: App
-                )
-                .ConfigureAwait(true);
-
-            var apiModel = ApiModel.TagCollection.FromJsonArray(
-                arrayItemsJson: responseBody,
-                instance: new ApiModel.TagCollection(),
-                entityFromJsonCallback: (x) => ApiModel.Tag.FromJson(x)
+            Func<string, Task<dynamic>> getNextPageHandler = async (string cursor) =>
+                await GetTagsPaged(cursor, includeAssetItems);
+            Tag[] allResults = await GetAllEntitiesByPages<Tag, TagCollection>(
+                getNextPageHandler
             );
+            return new TagCollection(allResults, App);
+        }
 
-            return Util.DefineN1AppInScope(App, () =>
+        /// <summary>
+        /// Gets tags in this project, by page.
+        /// </summary>
+        /// <inheritdoc cref="GetAllTags" />
+        public async Task<QueryResult<TagCollection, Tag, ApiModel.TagCollection, ApiModel.Tag>> GetTagsPaged(
+            string cursor = null, bool? includeAssetItems = null)
+        {
+            var apiRelativeUrlPath = ApiPaths.OrganizationsProjectsTagsFormat.ReplaceOrgIdAndProjectIdPlaceholdersUsingProject(this);
+            Action<Dictionary<string, dynamic>> qpCallback = (qp) =>
             {
-                var tags = Model.TagCollection.FromApiModel(apiModel);
-                if ((tags == null) || (tags.Items.Length == 0))
-                    return null;
-                return tags;
-            });
+                Util.SetDictionaryValueIfNotNull(qp, "includeAssetItems", includeAssetItems);
+            };
+            return await GetItemsPaged<TagCollection, Tag, ApiModel.TagCollection, ApiModel.Tag>(
+                apiRelativeUrlPath, qpCallback, cursor
+            );
         }
 
         /// <summary>

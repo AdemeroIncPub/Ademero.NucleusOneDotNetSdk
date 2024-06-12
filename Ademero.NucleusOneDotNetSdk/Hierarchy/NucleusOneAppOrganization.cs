@@ -119,7 +119,7 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         */
 
         /// <summary>
-        /// Getsa all projects that the current user is a member of.
+        /// Gets all projects that the current user is a member of.
         /// </summary>
         /// <param name="cursor">The ID of the cursor, from a previous query. Used for paging results.</param>
         /// <param name="projectAccessType">
