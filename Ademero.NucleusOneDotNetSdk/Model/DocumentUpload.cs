@@ -59,7 +59,7 @@ namespace Ademero.NucleusOneDotNetSdk.Model
 
         public string OriginalFilepath { get; set; }
 
-        public int OriginalFileSize { get; set; }
+        public long OriginalFileSize { get; set; }
 
         public Dictionary<string, List<string>> FieldIDsAndValues { get; set; }
 

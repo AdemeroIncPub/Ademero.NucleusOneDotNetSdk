@@ -45,7 +45,7 @@ namespace Ademero.NucleusOneDotNetSdk.ApiModel
         public string OriginalFilepath { get; set; }
 
         [JsonProperty("OriginalFileSize")]
-        public int OriginalFileSize { get; set; }
+        public long OriginalFileSize { get; set; }
 
         [JsonProperty("FieldIDsAndValues")]
         public Dictionary<string, List<string>> FieldIDsAndValues { get; set; }

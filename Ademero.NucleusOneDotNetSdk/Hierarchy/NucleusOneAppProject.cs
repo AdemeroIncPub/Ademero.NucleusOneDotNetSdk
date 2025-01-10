@@ -80,78 +80,89 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// </summary>
         /// <param name="gcsPublicReservationUrl">The URL for reserving space in Google Cloud Storage.</param>
         /// <param name="contentType">The content type of the file.</param>
-        /// <param name="file">The file to upload.</param>
-        /// <returns>A task representing the asynchronous upload operation.</returns>
-        private static async Task UploadFileToGcsFromUrl(string gcsPublicReservationUrl, string contentType, byte[] file)
+        /// <param name="stream">The stream containing the file to upload.</param>
+        /// <returns>A task representing the total size of the uploaded file in bytes.</returns>
+        private static async Task<long> UploadFileToGcsFromUrl(string gcsPublicReservationUrl, string contentType, System.IO.Stream stream)
         {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
             var apiUri = new Uri(gcsPublicReservationUrl);
             var httpClient = Http.GetStandardHttpClient();
-            var initialReq = new HttpRequestMessage(HttpMethod.Put, apiUri)
+
+            // Initialize upload
+            using (var initialReq = new HttpRequestMessage(HttpMethod.Put, apiUri)
             {
                 Content = new StringContent("{}"),
-            };
-            if (initialReq.Content != null)
+            })
             {
                 //initialReq.Headers.Add("Content-Type", "application/octet-stream");
                 initialReq.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-            }
+                initialReq.Headers.Add("x-goog-resumable", "start");
 
-            initialReq.Headers.Add("x-goog-resumable", "start");
-
-            var initialResp = await httpClient.SendAsync(initialReq);
-            if (!initialResp.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error initializing upload to cloud storage. HTTP {(int)initialResp.StatusCode}: {await initialResp.Content.ReadAsStringAsync()}");
-            }
-
-            var sessionUriString = initialResp.Headers.Location.ToString();
-            if (string.IsNullOrEmpty(sessionUriString))
-            {
-                throw new Exception("Unable to get upload URL.");
-            }
-            var sessionUri = new Uri(sessionUriString);
-
-            int offset = 0;
-            var fileSize = file.Length;
-
-            // Read each chunk and upload synchronously
-            while (offset < fileSize || fileSize == 0)
-            {
-                // Get chunk
-                var currentChunkSize = Math.Min(offset + NucleusOneOptions.UploadChunkSize, fileSize);
-                var binaryChunk = new byte[currentChunkSize - offset];
-                Array.Copy(file, offset, binaryChunk, 0, currentChunkSize - offset);
-                var byteEnd = (fileSize == 0)
-                    ? 0
-                    : Math.Min(offset + NucleusOneOptions.UploadChunkSize - 1, fileSize - 1);
-
-                var chunkReqHttpClient = Http.GetStandardHttpClient();
-                var chunkReq = new HttpRequestMessage(HttpMethod.Put, sessionUri)
+                using (var initialResp = await httpClient.SendAsync(initialReq))
                 {
-                    Content = new ByteArrayContent(binaryChunk),
-                };
-                if (chunkReq.Content != null)
-                {
-                    //chunkReq.Headers.Add("Content-Type", contentType);
-                    chunkReq.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-                    chunkReq.Content.Headers.ContentRange = new ContentRangeHeaderValue(offset, byteEnd, fileSize);
+                    if (!initialResp.IsSuccessStatusCode)
+                    {
+                        throw new Exception($"Error initializing upload to cloud storage. HTTP {(int)initialResp.StatusCode}: {await initialResp.Content.ReadAsStringAsync()}");
+                    }
+                    var sessionUriString = initialResp.Headers.Location?.ToString();
+                    if (string.IsNullOrEmpty(sessionUriString))
+                    {
+                        throw new Exception("Unable to get upload URL.");
+                    }
+
+                    var sessionUri = new Uri(sessionUriString);
+                    long offset = 0;
+                    var buffer = new byte[NucleusOneOptions.UploadChunkSize];
+
+                    // Read each chunk and upload synchronously
+                    while (true)
+                    {
+                        // Get chunk
+                        var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+
+                        using (var chunkReq = new HttpRequestMessage(HttpMethod.Put, sessionUri)
+                        {
+                            Content = new ByteArrayContent(buffer, 0, bytesRead),
+                        })
+                        {
+                            //chunkReq.Headers.Add("Content-Type", contentType);
+                            chunkReq.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+
+                            if (bytesRead == 0)
+                            {
+                                // Zero-byte file or end of stream
+                                chunkReq.Content.Headers.ContentRange = new ContentRangeHeaderValue(0, 0, offset);
+                            }
+                            else if (bytesRead < buffer.Length)
+                            {
+                                // Final chunk with known total size
+                                chunkReq.Content.Headers.ContentRange = new ContentRangeHeaderValue(offset, offset + bytesRead - 1, offset + bytesRead);
+                            }
+                            else
+                            {
+                                // Middle chunk with unknown total size
+                                chunkReq.Content.Headers.TryAddWithoutValidation("Content-Range", $"bytes {offset}-{offset + bytesRead - 1}/*");
+                            }
+
+                            using (var chunkResp = await httpClient.SendAsync(chunkReq))
+                            {
+                                // A 308 is desired after uploading a chunk
+                                if (chunkResp.StatusCode != System.Net.HttpStatusCode.OK && (int)chunkResp.StatusCode != 308)
+                                {
+                                    throw new Exception($"Error uploading to cloud storage. HTTP {(int)chunkResp.StatusCode}: {await chunkResp.Content.ReadAsStringAsync()}");
+                                }
+
+                                // Increment offset
+                                offset += bytesRead;
+
+                                if (bytesRead < buffer.Length)
+                                    return offset;
+                            }
+                        }
+                    }
                 }
-
-                var chunkResp = await chunkReqHttpClient.SendAsync(chunkReq);
-
-                // A 308 is desired after uploading a chunk
-                if (chunkResp.StatusCode != System.Net.HttpStatusCode.OK && (int)chunkResp.StatusCode != 308)
-                {
-                    throw new Exception($"Error uploading to cloud storage. HTTP {(int)chunkResp.StatusCode}: {await chunkResp.Content.ReadAsStringAsync()}");
-                }
-
-                // Stop here if this is a 0-byte binary
-                if (fileSize == 0)
-                {
-                    break;
-                }
-                // Increment offset
-                offset += binaryChunk.Length;
             }
         }
 
@@ -260,19 +271,18 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <param name="userEmail">The email address of the user by whom the document will be uploaded.</param>
         /// <param name="fileName">The file name to use when uploading the file.</param>
         /// <param name="contentType">The MIME type of the file.</param>
-        /// <param name="file">The file to upload.</param>
+        /// <param name="stream">The stream containing the file to upload.</param>
         /// <param name="documentFolderId">The ID of the folder to place the document in.</param>
         /// <param name="fieldIDsAndValues">Document field IDs and values.</param>
         /// <param name="tags">Document tags.</param>
         /// <param name="skipOcr">Whether or not the file should be skipped.</param>
         /// <returns>A task representing the asynchronous upload operation.</returns>
-        public async Task UploadDocument(string userEmail, string fileName, string contentType, byte[] file,
+        public async Task UploadDocument(string userEmail, string fileName, string contentType, System.IO.Stream stream,
             string documentFolderId = null, Dictionary<string, List<string>> fieldIDsAndValues = null,
             HashSet<string> tags = null, bool skipOcr = false)
         {
             var docUploadReservation = await GetDocumentUploadReservation();
-            var fileSize = file.Length;
-            await UploadFileToGcsFromUrl(docUploadReservation.SignedUrl, contentType, file);
+            var fileSize = await UploadFileToGcsFromUrl(docUploadReservation.SignedUrl, contentType, stream);
 
             docUploadReservation.OriginalFilename = fileName;
             docUploadReservation.OriginalFileSize = fileSize;

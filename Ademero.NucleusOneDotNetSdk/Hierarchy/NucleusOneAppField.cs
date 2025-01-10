@@ -48,12 +48,12 @@ namespace Ademero.NucleusOneDotNetSdk.Hierarchy
         /// <param name="userEmail">The email address of the user by whom the document will be uploaded.</param>
         /// <param name="fileName">The file name to use when uploading the file.</param>
         /// <param name="contentType">The MIME type of the file.</param>
-        /// <param name="file">The file to upload.</param>
+        /// <param name="stream">The stream containing the file to upload.</param>
         /// <returns>A task representing the asynchronous upload operation.</returns>
-        public async Task UploadDocument(string userEmail, string fileName, string contentType, byte[] file,
+        public async Task UploadDocument(string userEmail, string fileName, string contentType, System.IO.Stream stream,
             Dictionary<string, List<string>> fieldIDsAndValues = null)
         {
-            await Project.UploadDocument(userEmail, fileName, contentType, file, Id, fieldIDsAndValues);
+            await Project.UploadDocument(userEmail, fileName, contentType, stream, Id, fieldIDsAndValues);
         }
 
         /// <summary>
